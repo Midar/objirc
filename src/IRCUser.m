@@ -20,7 +20,13 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <stdlib.h>
 #include <string.h>
+
+#import <ObjFW/OFString.h>
+
+#import <ObjFW/OFInvalidFormatException.h>
+#import <ObjFW/OFOutOfMemoryException.h>
 
 #import "IRCUser.h"
 

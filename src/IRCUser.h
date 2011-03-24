@@ -20,7 +20,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#import <ObjFW/ObjFW.h>
+#import <ObjFW/OFObject.h>
 
 @interface IRCUser: OFObject <OFCopying>
 {

@@ -20,7 +20,9 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#import <ObjFW/ObjFW.h>
+#import <ObjFW/OFString.h>
+#import <ObjFW/OFApplication.h>
+#import <ObjFW/OFFile.h>
 
 #import "IRCConnection.h"
 #import "IRCUser.h"

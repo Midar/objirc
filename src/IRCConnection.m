@@ -27,8 +27,8 @@
 #import <ObjFW/OFMutableDictionary.h>
 #import <ObjFW/OFTCPSocket.h>
 #import <ObjFW/OFAutoreleasePool.h>
-#import <ObjFW/OFExceptions.h>
-#import <ObjFW/OFBlock.h>
+
+#import <ObjFW/OFInvalidEncodingException.h>
 
 #import "IRCConnection.h"
 #import "IRCUser.h"
