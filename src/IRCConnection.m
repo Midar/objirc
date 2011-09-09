@@ -233,6 +233,33 @@
 			continue;
 		}
 
+		/* QUIT */
+		if (splitted.count >= 2 &&
+		    [[splitted objectAtIndex: 1] isEqual: @"QUIT"]) {
+			OFString *who = [splitted objectAtIndex: 0];
+			IRCUser *user;
+			OFString *reason = nil;
+			size_t pos = who.length + 1 +
+			    [[splitted objectAtIndex: 1] length];
+
+			who = [who substringWithRange:
+			    of_range(1, who.length - 1)];
+
+			user = [IRCUser IRCUserWithString: who];
+
+			if (splitted.count > 2)
+				reason = [line substringWithRange:
+				    of_range(pos + 2, line.length - pos - 2)];
+
+			if ([delegate respondsToSelector:
+			    @selector(connection:didSeeUserQuit:withReason:)])
+				[delegate connection: self
+				      didSeeUserQuit: user
+					  withReason: reason];
+
+			continue;
+		}
+
 		/* PRIVMSG */
 		if (splitted.count >= 4 &&
 		    [[splitted objectAtIndex: 1] isEqual: @"PRIVMSG"]) {

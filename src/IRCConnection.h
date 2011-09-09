@@ -43,6 +43,9 @@
 	didSeeUser: (IRCUser*)user
       leaveChannel: (IRCChannel*)channel
 	withReason: (OFString*)reason;
+- (void)connection: (IRCConnection*)connection
+    didSeeUserQuit: (IRCUser*)user
+	withReason: (OFString*)reason;
 -  (void)connection: (IRCConnection*)connection
   didReceiveMessage: (OFString*)msg
 	   fromUser: (IRCUser*)user
