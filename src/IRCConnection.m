@@ -182,9 +182,6 @@
 
 			who = [who substringWithRange:
 			    of_range(1, who.length - 1)];
-			where = [where substringWithRange:
-			    of_range(1, where.length - 1)];
-
 			user = [IRCUser IRCUserWithString: who];
 
 			if ([who hasPrefix:
@@ -200,6 +197,38 @@
 				[delegate connection: self
 					  didSeeUser: user
 					 joinChannel: channel];
+
+			continue;
+		}
+
+		/* PART */
+		if (splitted.count >= 3 &&
+		    [[splitted objectAtIndex: 1] isEqual: @"PART"]) {
+			OFString *who = [splitted objectAtIndex: 0];
+			OFString *where = [splitted objectAtIndex: 2];
+			IRCUser *user;
+			IRCChannel *channel;
+			OFString *reason = nil;
+			size_t pos = who.length + 1 +
+			    [[splitted objectAtIndex: 1] length] + 1 +
+			    where.length;
+
+			who = [who substringWithRange:
+			    of_range(1, who.length - 1)];
+			user = [IRCUser IRCUserWithString: who];
+			channel = [channels objectForKey: where];
+
+			if (splitted.count > 3)
+				reason = [line substringWithRange:
+				    of_range(pos + 2, line.length - pos - 2)];
+
+			if ([delegate respondsToSelector:
+			    @selector(connection:didSeeUser:leaveChannel:
+			    withReason:)])
+				[delegate connection: self
+					  didSeeUser: user
+					leaveChannel: channel
+					  withReason: reason];
 
 			continue;
 		}

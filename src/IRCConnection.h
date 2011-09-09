@@ -31,19 +31,23 @@
 
 @protocol IRCConnectionDelegate
 @optional
-- (void)connection: (IRCConnection*)conn
+- (void)connection: (IRCConnection*)connection
     didReceiveLine: (OFString*)line;
-- (void)connection: (IRCConnection*)conn
+- (void)connection: (IRCConnection*)connection
        didSendLine: (OFString*)line;
-- (void)connectionWasEstablished: (IRCConnection*)conn;
-- (void)connection: (IRCConnection*)conn
+- (void)connectionWasEstablished: (IRCConnection*)connection;
+- (void)connection: (IRCConnection*)connection
 	didSeeUser: (IRCUser*)user
        joinChannel: (IRCChannel*)channel;
--  (void)connection: (IRCConnection*)conn
+- (void)connection: (IRCConnection*)connection
+	didSeeUser: (IRCUser*)user
+      leaveChannel: (IRCChannel*)channel
+	withReason: (OFString*)reason;
+-  (void)connection: (IRCConnection*)connection
   didReceiveMessage: (OFString*)msg
 	   fromUser: (IRCUser*)user
 	  inChannel: (IRCChannel*)channel;
--	  (void)connection: (IRCConnection*)conn
+-	  (void)connection: (IRCConnection*)connection
   didReceivePrivateMessage: (OFString*)msg
 		  fromUser: (IRCUser*)user;
 @end
