@@ -130,7 +130,7 @@
 {
 	OFAutoreleasePool *pool = [[OFAutoreleasePool alloc] init];
 	OFString *line;
-	OFArray *splitted;
+	OFArray *split;
 
 	for (;;) {
 		@try {
@@ -149,11 +149,10 @@
 			[delegate connection: self
 			      didReceiveLine: line];
 
-		splitted = [line componentsSeparatedByString: @" "];
+		split = [line componentsSeparatedByString: @" "];
 
 		/* PING */
-		if (splitted.count == 2 &&
-		    [splitted.firstObject isEqual: @"PING"]) {
+		if (split.count == 2 && [split.firstObject isEqual: @"PING"]) {
 			OFMutableString *s = [[line mutableCopy] autorelease];
 			[s replaceOccurrencesOfString: @"PING"
 					   withString: @"PONG"];
@@ -163,8 +162,8 @@
 		}
 
 		/* Connected */
-		if (splitted.count >= 4 &&
-		    [[splitted objectAtIndex: 1] isEqual: @"001"]) {
+		if (split.count >= 4 &&
+		    [[split objectAtIndex: 1] isEqual: @"001"]) {
 			if ([delegate respondsToSelector:
 			    @selector(connectionWasEstablished:)])
 				[delegate connectionWasEstablished: self];
@@ -173,10 +172,10 @@
 		}
 
 		/* JOIN */
-		if (splitted.count == 3 &&
-		    [[splitted objectAtIndex: 1] isEqual: @"JOIN"]) {
-			OFString *who = [splitted objectAtIndex: 0];
-			OFString *where = [splitted objectAtIndex: 2];
+		if (split.count == 3 &&
+		    [[split objectAtIndex: 1] isEqual: @"JOIN"]) {
+			OFString *who = [split objectAtIndex: 0];
+			OFString *where = [split objectAtIndex: 2];
 			IRCUser *user;
 			IRCChannel *channel;
 
@@ -202,15 +201,15 @@
 		}
 
 		/* PART */
-		if (splitted.count >= 3 &&
-		    [[splitted objectAtIndex: 1] isEqual: @"PART"]) {
-			OFString *who = [splitted objectAtIndex: 0];
-			OFString *where = [splitted objectAtIndex: 2];
+		if (split.count >= 3 &&
+		    [[split objectAtIndex: 1] isEqual: @"PART"]) {
+			OFString *who = [split objectAtIndex: 0];
+			OFString *where = [split objectAtIndex: 2];
 			IRCUser *user;
 			IRCChannel *channel;
 			OFString *reason = nil;
 			size_t pos = who.length + 1 +
-			    [[splitted objectAtIndex: 1] length] + 1 +
+			    [[split objectAtIndex: 1] length] + 1 +
 			    where.length;
 
 			who = [who substringWithRange:
@@ -218,7 +217,7 @@
 			user = [IRCUser IRCUserWithString: who];
 			channel = [channels objectForKey: where];
 
-			if (splitted.count > 3)
+			if (split.count > 3)
 				reason = [line substringWithRange:
 				    of_range(pos + 2, line.length - pos - 2)];
 
@@ -234,20 +233,19 @@
 		}
 
 		/* QUIT */
-		if (splitted.count >= 2 &&
-		    [[splitted objectAtIndex: 1] isEqual: @"QUIT"]) {
-			OFString *who = [splitted objectAtIndex: 0];
+		if (split.count >= 2 &&
+		    [[split objectAtIndex: 1] isEqual: @"QUIT"]) {
+			OFString *who = [split objectAtIndex: 0];
 			IRCUser *user;
 			OFString *reason = nil;
 			size_t pos = who.length + 1 +
-			    [[splitted objectAtIndex: 1] length];
+			    [[split objectAtIndex: 1] length];
 
 			who = [who substringWithRange:
 			    of_range(1, who.length - 1)];
-
 			user = [IRCUser IRCUserWithString: who];
 
-			if (splitted.count > 2)
+			if (split.count > 2)
 				reason = [line substringWithRange:
 				    of_range(pos + 2, line.length - pos - 2)];
 
@@ -261,14 +259,14 @@
 		}
 
 		/* PRIVMSG */
-		if (splitted.count >= 4 &&
-		    [[splitted objectAtIndex: 1] isEqual: @"PRIVMSG"]) {
-			OFString *from = [splitted objectAtIndex: 0];
-			OFString *to = [splitted objectAtIndex: 2];
+		if (split.count >= 4 &&
+		    [[split objectAtIndex: 1] isEqual: @"PRIVMSG"]) {
+			OFString *from = [split objectAtIndex: 0];
+			OFString *to = [split objectAtIndex: 2];
 			IRCUser *user;
 			OFString *msg;
 			size_t pos = from.length + 1 +
-			    [[splitted objectAtIndex: 1] length] + 1 +
+			    [[split objectAtIndex: 1] length] + 1 +
 			    to.length;
 
 			from = [from substringWithRange:
