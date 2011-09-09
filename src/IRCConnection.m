@@ -181,6 +181,8 @@
 
 			who = [who substringWithRange:
 			    of_range(1, who.length - 1)];
+			where = [where substringWithRange:
+			    of_range(1, where.length - 1)];
 			user = [IRCUser IRCUserWithString: who];
 
 			if ([who hasPrefix:
