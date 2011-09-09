@@ -79,5 +79,9 @@
 	  withReason: (OFString*)reason;
 - (void)sendLine: (OFString*)line;
 - (void)sendLineWithFormat: (OFConstantString*)line, ...;
+- (void)sendMessage: (OFString*)msg
+	  toChannel: (IRCChannel*)channel;
+- (void)sendMessage: (OFString*)msg
+	     toUser: (IRCUser*)user;
 - (void)handleConnection;
 @end

@@ -126,6 +126,18 @@
 	[pool release];
 }
 
+- (void)sendMessage: (OFString*)msg
+	  toChannel: (IRCChannel*)channel
+{
+	[self sendLineWithFormat: @"PRIVMSG %@ :%@", channel.name, msg];
+}
+
+- (void)sendMessage: (OFString*)msg
+	     toUser: (IRCUser*)user
+{
+	[self sendLineWithFormat: @"PRIVMSG %@ :%@", user.nickname, msg];
+}
+
 - (void)handleConnection
 {
 	OFAutoreleasePool *pool = [[OFAutoreleasePool alloc] init];
