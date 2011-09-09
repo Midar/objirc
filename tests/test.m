@@ -87,6 +87,13 @@ OF_APPLICATION_DELEGATE(TestApp)
 	of_log(@"%@ quit (%@).", user, reason);
 }
 
+- (void)connection: (IRCConnection*)connection
+	didSeeUser: (IRCUser*)user
+  changeNicknameTo: (OFString *)nickname
+{
+	of_log(@"%@ changed nick to %@.", user, nickname);
+}
+
 -  (void)connection: (IRCConnection*)connection
   didReceiveMessage: (OFString*)msg
 	   fromUser: (IRCUser*)user

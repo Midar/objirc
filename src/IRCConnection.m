@@ -272,6 +272,26 @@
 			continue;
 		}
 
+		/* NICK */
+		if ([action isEqual: @"NICK"] && split.count == 3) {
+			OFString *who = [split objectAtIndex: 0];
+			OFString *newNickname = [split objectAtIndex: 2];
+			IRCUser *user;
+
+			who = [who substringWithRange:
+			    of_range(1, who.length - 1)];
+			newNickname = [newNickname substringWithRange:
+			    of_range(1, newNickname.length - 1)];
+
+			user = [IRCUser IRCUserWithString: who];
+
+			if ([delegate respondsToSelector:
+			    @selector(connection:didSeeUser:changeNicknameTo:)])
+				[delegate connection: self
+					  didSeeUser: user
+				    changeNicknameTo: newNickname];
+		}
+
 		/* PRIVMSG */
 		if ([action isEqual: @"PRIVMSG"] && split.count >= 4) {
 			OFString *from = [split objectAtIndex: 0];
