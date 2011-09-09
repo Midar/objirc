@@ -145,6 +145,8 @@
 	OFArray *split;
 
 	for (;;) {
+		OFString *action = nil;
+
 		@try {
 			line = [sock readLine];
 		} @catch (OFInvalidEncodingException *e) {
@@ -173,9 +175,10 @@
 			continue;
 		}
 
+		action = [[split objectAtIndex: 1] uppercaseString];
+
 		/* Connected */
-		if (split.count >= 4 &&
-		    [[split objectAtIndex: 1] isEqual: @"001"]) {
+		if ([action isEqual: @"001"] && split.count >= 4) {
 			if ([delegate respondsToSelector:
 			    @selector(connectionWasEstablished:)])
 				[delegate connectionWasEstablished: self];
@@ -184,8 +187,7 @@
 		}
 
 		/* JOIN */
-		if (split.count == 3 &&
-		    [[split objectAtIndex: 1] isEqual: @"JOIN"]) {
+		if ([action isEqual: @"JOIN"] && split.count == 3) {
 			OFString *who = [split objectAtIndex: 0];
 			OFString *where = [split objectAtIndex: 2];
 			IRCUser *user;
@@ -215,8 +217,7 @@
 		}
 
 		/* PART */
-		if (split.count >= 3 &&
-		    [[split objectAtIndex: 1] isEqual: @"PART"]) {
+		if ([action isEqual: @"part"] && split.count >= 3) {
 			OFString *who = [split objectAtIndex: 0];
 			OFString *where = [split objectAtIndex: 2];
 			IRCUser *user;
@@ -247,8 +248,7 @@
 		}
 
 		/* QUIT */
-		if (split.count >= 2 &&
-		    [[split objectAtIndex: 1] isEqual: @"QUIT"]) {
+		if ([action isEqual: @"QUIT"] && split.count >= 2) {
 			OFString *who = [split objectAtIndex: 0];
 			IRCUser *user;
 			OFString *reason = nil;
@@ -273,8 +273,7 @@
 		}
 
 		/* PRIVMSG */
-		if (split.count >= 4 &&
-		    [[split objectAtIndex: 1] isEqual: @"PRIVMSG"]) {
+		if ([action isEqual: @"PRIVMSG"] && split.count >= 4) {
 			OFString *from = [split objectAtIndex: 0];
 			OFString *to = [split objectAtIndex: 2];
 			IRCUser *user;
