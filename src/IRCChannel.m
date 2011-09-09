@@ -50,4 +50,9 @@
 
 	[super dealloc];
 }
+
+- (OFString*)description
+{
+	return name;
+}
 @end
