@@ -71,6 +71,6 @@
 - (void)leaveChannel: (IRCChannel*)channel
 	  withReason: (OFString*)reason;
 - (void)sendLine: (OFString*)line;
-- (void)sendLineWithFormat: (OFString*)line, ...;
+- (void)sendLineWithFormat: (OFConstantString*)line, ...;
 - (void)handleConnection;
 @end

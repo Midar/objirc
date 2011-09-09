@@ -58,7 +58,7 @@
 
 	sock = [[OFTCPSocket alloc] init];
 	[sock connectToHost: server
-		     onPort: port];
+		       port: port];
 
 	[self sendLineWithFormat: @"NICK %@", nickname];
 	[self sendLineWithFormat: @"USER %@ * 0 :%@", username, realname];
@@ -110,7 +110,7 @@
 	[sock writeLine: line];
 }
 
-- (void)sendLineWithFormat: (OFString*)format, ...
+- (void)sendLineWithFormat: (OFConstantString*)format, ...
 {
 	OFAutoreleasePool *pool = [[OFAutoreleasePool alloc] init];
 	OFString *line;
@@ -180,10 +180,10 @@
 			IRCUser *user;
 			IRCChannel *channel;
 
-			who = [who substringFromIndex: 1
-					      toIndex: who.length];
-			where = [where substringFromIndex: 1
-						  toIndex: where.length];
+			who = [who substringWithRange:
+			    of_range(1, who.length - 1)];
+			where = [where substringWithRange:
+			    of_range(1, where.length - 1)];
 
 			user = [IRCUser IRCUserWithString: who];
 
@@ -215,10 +215,10 @@
 			    [[splitted objectAtIndex: 1] length] + 1 +
 			    to.length;
 
-			from = [from substringFromIndex: 1
-						toIndex: from.length];
-			msg = [line substringFromIndex: pos + 2
-					       toIndex: line.length];
+			from = [from substringWithRange:
+			    of_range(1, from.length - 1)];
+			msg = [line substringWithRange:
+			    of_range(pos + 2, line.length - pos - 2)];
 
 			user = [IRCUser IRCUserWithString: from];
 
