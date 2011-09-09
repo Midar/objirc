@@ -36,51 +36,59 @@ OF_APPLICATION_DELEGATE(TestApp)
 @implementation TestApp
 - (void)applicationDidFinishLaunching
 {
-	IRCConnection *conn = [[IRCConnection alloc] init];
+	IRCConnection *connection = [[IRCConnection alloc] init];
 
-	conn.server = @"leguin.freenode.net";
-	conn.nickname = @"ObjIRC";
-	conn.username = @"ObjIRC";
-	conn.realname = @"ObjIRC";
-	conn.delegate = self;
+	connection.server = @"irc.freenode.net";
+	connection.nickname = @"ObjIRC";
+	connection.username = @"ObjIRC";
+	connection.realname = @"ObjIRC";
+	connection.delegate = self;
 
-	[conn connect];
-	[conn handleConnection];
+	[connection connect];
+	[connection handleConnection];
 }
 
-- (void)connection: (IRCConnection*)conn
+- (void)connection: (IRCConnection*)connection
     didReceiveLine: (OFString*)line
 {
 	[of_stderr writeFormat: @"> %@\n", line];
 }
 
-- (void)connection: (IRCConnection*)conn
+- (void)connection: (IRCConnection*)connection
        didSendLine: (OFString*)line
 {
 	[of_stderr writeFormat: @"< %@\n", line];
 }
 
-- (void)connectionWasEstablished: (IRCConnection*)conn
+- (void)connectionWasEstablished: (IRCConnection*)connection
 {
-	[conn joinChannel: @"#objfw"];
+	[connection joinChannel: @"#objfw"];
 }
 
-- (void)connection: (IRCConnection*)conn
+- (void)connection: (IRCConnection*)connection
 	didSeeUser: (IRCUser*)user
        joinChannel: (IRCChannel*)channel
 {
-	of_log(@"%@ joined %@.", user, channel.name);
+	of_log(@"%@ joined %@.", user, channel);
 }
 
--  (void)connection: (IRCConnection*)conn
+- (void)connection: (IRCConnection*)connection
+	didSeeUser: (IRCUser*)user
+      leaveChannel: (IRCChannel*)channel
+	withReason: (OFString*)reason
+{
+	of_log(@"%@ left %@ (%@).", user, channel, reason);
+}
+
+-  (void)connection: (IRCConnection*)connection
   didReceiveMessage: (OFString*)msg
 	   fromUser: (IRCUser*)user
 	  inChannel: (IRCChannel*)channel
 {
-	of_log(@"[%@] %@: %@", channel.name, user, msg);
+	of_log(@"[%@] %@: %@", channel, user, msg);
 }
 
--	  (void)connection: (IRCConnection*)conn
+-	  (void)connection: (IRCConnection*)connection
   didReceivePrivateMessage: (OFString*)msg
 		  fromUser: (IRCUser*)user
 {
