@@ -150,6 +150,14 @@
 	[self sendLineWithFormat: @"NOTICE %@ :%@", channel.name, notice];
 }
 
+- (void)kickUser: (IRCUser*)user
+     fromChannel: (IRCChannel*)channel
+      withReason: (OFString*)reason
+{
+	[self sendLineWithFormat: @"KICK %@ %@ :%@",
+				  channel.name, user.nickname, reason];
+}
+
 - (void)handleConnection
 {
 	OFAutoreleasePool *pool = [[OFAutoreleasePool alloc] init];

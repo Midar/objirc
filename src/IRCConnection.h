@@ -85,6 +85,8 @@
 @property (copy) OFString *nickname, *username, *realname;
 @property (retain) id <IRCConnectionDelegate, OFObject> delegate;
 
+- (void)sendLine: (OFString*)line;
+- (void)sendLineWithFormat: (OFConstantString*)line, ...;
 - (void)connect;
 - (void)disconnect;
 - (void)disconnectWithReason: (OFString*)reason;
@@ -92,8 +94,6 @@
 - (void)leaveChannel: (IRCChannel*)channel;
 - (void)leaveChannel: (IRCChannel*)channel
 	  withReason: (OFString*)reason;
-- (void)sendLine: (OFString*)line;
-- (void)sendLineWithFormat: (OFConstantString*)line, ...;
 - (void)sendMessage: (OFString*)msg
 	  toChannel: (IRCChannel*)channel;
 - (void)sendMessage: (OFString*)msg
@@ -102,5 +102,8 @@
 	    toUser: (IRCUser*)user;
 - (void)sendNotice: (OFString*)notice
 	 toChannel: (IRCChannel*)channel;
+- (void)kickUser: (IRCUser*)user
+     fromChannel: (IRCChannel*)channel
+      withReason: (OFString*)reason;
 - (void)handleConnection;
 @end
