@@ -158,6 +158,11 @@
 				  channel.name, user.nickname, reason];
 }
 
+- (void)changeNicknameTo: (OFString*)nickname_
+{
+	[self sendLineWithFormat: @"NICK %@", nickname_];
+}
+
 - (void)handleConnection
 {
 	OFAutoreleasePool *pool = [[OFAutoreleasePool alloc] init];
@@ -337,6 +342,11 @@
 			    of_range(1, newNickname.length - 1)];
 
 			user = [IRCUser IRCUserWithString: who];
+
+			if ([user.nickname isEqual: nickname]) {
+				[nickname release];
+				nickname = [user.nickname copy];
+			}
 
 			if ([delegate respondsToSelector:
 			    @selector(connection:didSeeUser:changeNicknameTo:)])

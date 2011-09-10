@@ -105,5 +105,6 @@
 - (void)kickUser: (IRCUser*)user
      fromChannel: (IRCChannel*)channel
       withReason: (OFString*)reason;
+- (void)changeNicknameTo: (OFString*)nickname;
 - (void)handleConnection;
 @end
