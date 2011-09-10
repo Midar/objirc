@@ -98,5 +98,9 @@
 	  toChannel: (IRCChannel*)channel;
 - (void)sendMessage: (OFString*)msg
 	     toUser: (IRCUser*)user;
+- (void)sendNotice: (OFString*)notice
+	    toUser: (IRCUser*)user;
+- (void)sendNotice: (OFString*)notice
+	 toChannel: (IRCChannel*)channel;
 - (void)handleConnection;
 @end
