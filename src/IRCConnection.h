@@ -56,6 +56,13 @@
 -	  (void)connection: (IRCConnection*)connection
   didReceivePrivateMessage: (OFString*)msg
 		  fromUser: (IRCUser*)user;
+- (void)connection: (IRCConnection*)connection
+  didReceiveNotice: (OFString*)notice
+	  fromUser: (IRCUser*)user;
+- (void)connection: (IRCConnection*)connection
+  didReceiveNotice: (OFString*)notice
+	  fromUser: (IRCUser*)user
+	 inChannel: (IRCChannel*)channel;
 @end
 
 @interface IRCConnection: OFObject

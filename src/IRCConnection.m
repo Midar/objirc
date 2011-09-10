@@ -217,7 +217,7 @@
 		}
 
 		/* PART */
-		if ([action isEqual: @"part"] && split.count >= 3) {
+		if ([action isEqual: @"PART"] && split.count >= 3) {
 			OFString *who = [split objectAtIndex: 0];
 			OFString *where = [split objectAtIndex: 2];
 			IRCUser *user;
@@ -306,7 +306,6 @@
 			    of_range(1, from.length - 1)];
 			msg = [line substringWithRange:
 			    of_range(pos + 2, line.length - pos - 2)];
-
 			user = [IRCUser IRCUserWithString: from];
 
 			if (![to isEqual: nickname]) {
@@ -329,6 +328,51 @@
 					    connection: self
 					    didReceivePrivateMessage: msg
 					    fromUser: user];
+			}
+
+			continue;
+		}
+
+		/* NOTICE */
+		if ([action isEqual: @"NOTICE"] && split.count >= 4) {
+			OFString *from = [split objectAtIndex: 0];
+			OFString *to = [split objectAtIndex: 2];
+			IRCUser *user = nil;
+			OFString *notice;
+			size_t pos = from.length + 1 +
+			    [[split objectAtIndex: 1] length] + 1 +
+			    to.length;
+
+			from = [from substringWithRange:
+			    of_range(1, from.length - 1)];
+			notice = [line substringWithRange:
+			    of_range(pos + 2, line.length - pos - 2)];
+
+			if (![from containsString: @"!"] || [to isEqual: @"*"])
+				/* System message - ignore for now */
+				continue;
+
+			user = [IRCUser IRCUserWithString: from];
+
+			if (![to isEqual: nickname]) {
+				IRCChannel *channel;
+
+				channel = [channels objectForKey: to];
+
+				if ([delegate respondsToSelector:
+				    @selector(connection:didReceiveNotice:
+				    fromUser:inChannel:)])
+					[delegate connection: self
+					    didReceiveNotice: notice
+						    fromUser: user
+						   inChannel: channel];
+			} else {
+				if ([delegate respondsToSelector:
+				    @selector(connection:didReceiveNotice:
+				    fromUser:)])
+					[delegate connection: self
+					    didReceiveNotice: notice
+						    fromUser: user];
 			}
 
 			continue;
