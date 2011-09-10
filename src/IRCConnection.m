@@ -247,6 +247,39 @@
 			continue;
 		}
 
+		/* KICK */
+		if ([action isEqual: @"KICK"] && split.count >= 4) {
+			OFString *who = [split objectAtIndex: 0];
+			OFString *where = [split objectAtIndex: 2];
+			OFString *whom = [split objectAtIndex: 3];
+			IRCUser *user;
+			IRCChannel *channel;
+			OFString *reason = nil;
+			size_t pos = who.length + 1 +
+			    [[split objectAtIndex: 1] length] + 1 +
+			    where.length + 1 + whom.length;
+
+			who = [who substringWithRange:
+			    of_range(1, who.length - 1)];
+			user = [IRCUser IRCUserWithString: who];
+			channel = [channels objectForKey: where];
+
+			if (split.count > 4)
+				reason = [line substringWithRange:
+				    of_range(pos + 2, line.length - pos - 2)];
+
+			if ([delegate respondsToSelector:
+			    @selector(connection:didSeeUser:kickUser:
+			    fromChannel:withReason:)])
+				[delegate connection: self
+					  didSeeUser: user
+					    kickUser: whom
+					 fromChannel: channel
+					  withReason: reason];
+
+			continue;
+		}
+
 		/* QUIT */
 		if ([action isEqual: @"QUIT"] && split.count >= 2) {
 			OFString *who = [split objectAtIndex: 0];

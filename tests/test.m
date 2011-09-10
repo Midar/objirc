@@ -80,6 +80,15 @@ OF_APPLICATION_DELEGATE(TestApp)
 	of_log(@"%@ left %@ (%@).", user, channel, reason);
 }
 
+-    (void)connection: (IRCConnection*)connection
+	   didSeeUser: (IRCUser*)user
+	     kickUser: (OFString*)kickedUser
+	  fromChannel: (IRCChannel*)channel
+	   withReason: (OFString*)reason
+{
+	of_log(@"%@ kicked %@ from %@: %@", user, kickedUser, channel, reason);
+}
+
 - (void)connection: (IRCConnection*)connection
     didSeeUserQuit: (IRCUser*)user
 	withReason: (OFString*)reason

@@ -47,6 +47,11 @@
         didSeeUser: (IRCUser*)user
   changeNicknameTo: (OFString*)nickname;
 - (void)connection: (IRCConnection*)connection
+	didSeeUser: (IRCUser*)user
+	  kickUser: (OFString*)kickedUser
+       fromChannel: (IRCChannel*)channel
+	withReason: (OFString*)reason;
+- (void)connection: (IRCConnection*)connection
     didSeeUserQuit: (IRCUser*)user
 	withReason: (OFString*)reason;
 -  (void)connection: (IRCConnection*)connection
