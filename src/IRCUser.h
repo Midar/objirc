@@ -31,6 +31,6 @@
 
 @property (copy, readonly) OFString *nickname, *username, *hostname;
 
-+ IRCUserWithString: (OFString*)str;
-- initWithString: (OFString*)str;
++ IRCUserWithString: (OFString*)string;
+- initWithString: (OFString*)string;
 @end

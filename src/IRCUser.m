@@ -32,12 +32,12 @@
 
 @implementation IRCUser
 @synthesize username, nickname, hostname;
-+ IRCUserWithString: (OFString*)str
++ IRCUserWithString: (OFString*)string
 {
-	return [[[self alloc] initWithString: str] autorelease];
+	return [[[self alloc] initWithString: string] autorelease];
 }
 
-- initWithString: (OFString*)str
+- initWithString: (OFString*)string
 {
 	char *tmp2 = NULL;
 
@@ -46,24 +46,24 @@
 	@try {
 		char *tmp;
 
-		if ((tmp2 = strdup(str.cString)) == NULL)
+		if ((tmp2 = strdup([string UTF8String])) == NULL)
 			@throw [OFOutOfMemoryException
 			     newWithClass: isa
-			    requestedSize: str.cStringLength];
+			    requestedSize: [string UTF8StringLength]];
 
 		if ((tmp = strchr(tmp2, '@')) == NULL)
 			@throw [OFInvalidFormatException newWithClass: isa];
 
 		*tmp = '\0';
-		hostname = [[OFString alloc] initWithCString: tmp + 1];
+		hostname = [[OFString alloc] initWithUTF8String: tmp + 1];
 
 		if ((tmp = strchr(tmp2, '!')) == NULL)
 			@throw [OFInvalidFormatException newWithClass: isa];
 
 		*tmp = '\0';
-		username = [[OFString alloc] initWithCString: tmp + 1];
+		username = [[OFString alloc] initWithUTF8String: tmp + 1];
 
-		nickname = [[OFString alloc] initWithCString: tmp2];
+		nickname = [[OFString alloc] initWithUTF8String: tmp2];
 	} @catch (id e) {
 		[self release];
 		@throw e;
