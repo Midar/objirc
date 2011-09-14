@@ -35,7 +35,7 @@
 #import "IRCChannel.h"
 
 @implementation IRCConnection
-@synthesize server, port, nickname, username, realname, delegate;
+@synthesize server, port, nickname, username, realname, delegate, sock;
 
 - init
 {
