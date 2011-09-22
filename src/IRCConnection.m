@@ -173,7 +173,6 @@
 	@try {
 		line = [sock tryReadLine];
 	} @catch (OFInvalidEncodingException *e) {
-		[e dealloc];
 		line = [sock tryReadLineWithEncoding:
 		    OF_STRING_ENCODING_WINDOWS_1252];
 	}

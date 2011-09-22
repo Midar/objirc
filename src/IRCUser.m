@@ -48,17 +48,19 @@
 
 		if ((tmp2 = strdup([string UTF8String])) == NULL)
 			@throw [OFOutOfMemoryException
-			     newWithClass: isa
-			    requestedSize: [string UTF8StringLength]];
+			     exceptionWithClass: isa
+				  requestedSize: [string UTF8StringLength]];
 
 		if ((tmp = strchr(tmp2, '@')) == NULL)
-			@throw [OFInvalidFormatException newWithClass: isa];
+			@throw [OFInvalidFormatException
+			    exceptionWithClass: isa];
 
 		*tmp = '\0';
 		hostname = [[OFString alloc] initWithUTF8String: tmp + 1];
 
 		if ((tmp = strchr(tmp2, '!')) == NULL)
-			@throw [OFInvalidFormatException newWithClass: isa];
+			@throw [OFInvalidFormatException
+			    exceptionWithClass: isa];
 
 		*tmp = '\0';
 		username = [[OFString alloc] initWithUTF8String: tmp + 1];
