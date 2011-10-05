@@ -226,11 +226,54 @@
 		} else
 			channel = [channels objectForKey: where];
 
+		[channel IRC_addUser: user.nickname];
+
 		if ([delegate respondsToSelector:
 		    @selector(connection:didSeeUser:joinChannel:)])
 			[delegate connection: self
 				  didSeeUser: user
 				 joinChannel: channel];
+
+		[pool release];
+		return;
+	}
+
+	/* NAMES reply */
+	if ([action isEqual: @"353"] && split.count >= 6) {
+		IRCChannel *channel;
+		OFArray *users;
+		size_t pos;
+
+		channel = [channels objectForKey: [split objectAtIndex: 4]];
+		if (channel == nil) {
+			/* We did not request that */
+			[pool release];
+			return;
+		}
+
+		pos = [[split objectAtIndex: 0] length] +
+		    [[split objectAtIndex: 1] length] +
+		    [[split objectAtIndex: 2] length] +
+		    [[split objectAtIndex: 3] length] +
+		    [[split objectAtIndex: 4] length] + 6;
+
+		users = [[line substringWithRange:
+		    of_range(pos, line.length - pos)]
+		    componentsSeparatedByString: @" "];
+
+		for (OFString *user in users) {
+			if ([user hasPrefix: @"@"] || [user hasPrefix: @"+"] ||
+			    [user hasPrefix: @"%"] || [user hasPrefix: @"*"])
+				user = [user substringWithRange:
+				    of_range(1, user.length - 1)];
+
+			[channel IRC_addUser: user];
+		}
+
+		if ([delegate respondsToSelector: @selector(connection:
+		    didReceiveNamesForChannel:)])
+			[delegate	   connection: self
+			    didReceiveNamesForChannel: channel];
 
 		[pool release];
 		return;
@@ -253,6 +296,8 @@
 		if (split.count > 3)
 			reason = [line substringWithRange:
 			    of_range(pos + 2, line.length - pos - 2)];
+
+		[channel IRC_removeUser: user.nickname];
 
 		if ([delegate respondsToSelector:
 		    @selector(connection:didSeeUser:leaveChannel:
@@ -286,6 +331,8 @@
 			reason = [line substringWithRange:
 			    of_range(pos + 2, line.length - pos - 2)];
 
+		[channel IRC_removeUser: user.nickname];
+
 		if ([delegate respondsToSelector:
 		    @selector(connection:didSeeUser:kickUser:
 		    fromChannel:withReason:)])
@@ -313,6 +360,9 @@
 			reason = [line substringWithRange:
 			    of_range(pos + 2, line.length - pos - 2)];
 
+		for (IRCChannel *channel in channels)
+			[channel IRC_removeUser: user.nickname];
+
 		if ([delegate respondsToSelector:
 		    @selector(connection:didSeeUserQuit:withReason:)])
 			[delegate connection: self
@@ -338,6 +388,13 @@
 		if ([user.nickname isEqual: nickname]) {
 			[nickname release];
 			nickname = [user.nickname copy];
+		}
+
+		for (IRCChannel *channel in channels) {
+			if ([channel.users containsObject: user.nickname]) {
+				[channel IRC_removeUser: user.nickname];
+				[channel IRC_addUser: newNickname];
+			}
 		}
 
 		if ([delegate respondsToSelector:

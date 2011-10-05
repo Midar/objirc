@@ -21,16 +21,21 @@
  */
 
 #import <ObjFW/OFObject.h>
+#import <ObjFW/OFSet.h>
 
 @class OFString;
 
 @interface IRCChannel: OFObject
 {
 	OFString *name;
+	OFMutableSet *users;
 }
 
 @property (readonly) OFString *name;
+@property (copy) OFSet *users;
 
 + channelWithName: (OFString*)name;
 - initWithName: (OFString*)name;
+- (void)IRC_addUser: (OFString*)user;
+- (void)IRC_removeUser: (OFString*)user;
 @end

@@ -132,4 +132,10 @@ OF_APPLICATION_DELEGATE(TestApp)
 {
 	of_log(@"NOTICE: [%@] %@: %@", channel, user, notice);
 }
+
+-	   (void)connection: (IRCConnection*)connection
+  didReceiveNamesForChannel: (IRCChannel*)channel
+{
+	of_log(@"Users in %@: %@", channel, channel.users);
+}
 @end

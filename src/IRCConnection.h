@@ -68,6 +68,8 @@
   didReceiveNotice: (OFString*)notice
 	  fromUser: (IRCUser*)user
 	 inChannel: (IRCChannel*)channel;
+-	   (void)connection: (IRCConnection*)connection
+  didReceiveNamesForChannel: (IRCChannel*)channel;
 @end
 
 @interface IRCConnection: OFObject

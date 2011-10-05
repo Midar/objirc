@@ -23,7 +23,7 @@
 #import "IRCChannel.h"
 
 @implementation IRCChannel
-@synthesize name;
+@synthesize name, users;
 
 + channelWithName: (OFString*)name
 {
@@ -36,6 +36,7 @@
 
 	@try {
 		name = [name_ copy];
+		users = [[OFMutableSet alloc] init];
 	} @catch (id e) {
 		[self release];
 		@throw e;
@@ -47,6 +48,7 @@
 - (void)dealloc
 {
 	[name release];
+	[users release];
 
 	[super dealloc];
 }
@@ -54,5 +56,15 @@
 - (OFString*)description
 {
 	return name;
+}
+
+- (void)IRC_addUser: (OFString*)user
+{
+	[users addObject: user];
+}
+
+- (void)IRC_removeUser: (OFString*)user
+{
+	[users removeObject: user];
 }
 @end
