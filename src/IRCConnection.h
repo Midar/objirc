@@ -85,7 +85,7 @@
 @property (copy) OFString *server;
 @property (assign) uint16_t port;
 @property (copy) OFString *nickname, *username, *realname;
-@property (retain) id <IRCConnectionDelegate, OFObject> delegate;
+@property (assign) id <IRCConnectionDelegate, OFObject> delegate;
 @property (retain, getter=socket) OFTCPSocket *sock;
 
 - (void)sendLine: (OFString*)line;
