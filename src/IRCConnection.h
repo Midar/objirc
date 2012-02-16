@@ -70,6 +70,7 @@
 	 inChannel: (IRCChannel*)channel;
 -	   (void)connection: (IRCConnection*)connection
   didReceiveNamesForChannel: (IRCChannel*)channel;
+- (void)connectionWasClosed: (IRCConnection*)connection;
 @end
 
 @interface IRCConnection: OFObject

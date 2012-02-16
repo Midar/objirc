@@ -170,6 +170,14 @@
 	OFArray *split;
 	OFString *action = nil;
 
+	if (sock.atEndOfStream) {
+		if ([delegate respondsToSelector:
+		    @selector(connectionWasClosed:)])
+			[delegate connectionWasClosed: self];
+
+		return;
+	}
+
 	@try {
 		line = [sock tryReadLine];
 	} @catch (OFInvalidEncodingException *e) {

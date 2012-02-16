@@ -3,3 +3,7 @@ all:
 
 clean:
 	rm -f *.o *.so *.dylib *.dll
+
+install:
+	cp *.h /usr/local/include/ObjIRC/
+	cp libobjirc.dylib /usr/local/lib/
