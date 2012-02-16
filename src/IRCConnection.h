@@ -101,12 +101,12 @@
 - (void)sendMessage: (OFString*)msg
 	  toChannel: (IRCChannel*)channel;
 - (void)sendMessage: (OFString*)msg
-	     toUser: (IRCUser*)user;
+	     toUser: (OFString*)user;
 - (void)sendNotice: (OFString*)notice
-	    toUser: (IRCUser*)user;
+	    toUser: (OFString*)user;
 - (void)sendNotice: (OFString*)notice
 	 toChannel: (IRCChannel*)channel;
-- (void)kickUser: (IRCUser*)user
+- (void)kickUser: (OFString*)user
      fromChannel: (IRCChannel*)channel
       withReason: (OFString*)reason;
 - (void)changeNicknameTo: (OFString*)nickname;

@@ -133,15 +133,15 @@
 }
 
 - (void)sendMessage: (OFString*)msg
-	     toUser: (IRCUser*)user
+	     toUser: (OFString*)user
 {
-	[self sendLineWithFormat: @"PRIVMSG %@ :%@", user.nickname, msg];
+	[self sendLineWithFormat: @"PRIVMSG %@ :%@", user, msg];
 }
 
 - (void)sendNotice: (OFString*)notice
-	    toUser: (IRCUser*)user
+	    toUser: (OFString*)user
 {
-	[self sendLineWithFormat: @"NOTICE %@ :%@", user.nickname, notice];
+	[self sendLineWithFormat: @"NOTICE %@ :%@", user, notice];
 }
 
 - (void)sendNotice: (OFString*)notice
@@ -150,12 +150,12 @@
 	[self sendLineWithFormat: @"NOTICE %@ :%@", channel.name, notice];
 }
 
-- (void)kickUser: (IRCUser*)user
+- (void)kickUser: (OFString*)user
      fromChannel: (IRCChannel*)channel
       withReason: (OFString*)reason
 {
 	[self sendLineWithFormat: @"KICK %@ %@ :%@",
-				  channel.name, user.nickname, reason];
+				  channel.name, user, reason];
 }
 
 - (void)changeNicknameTo: (OFString*)nickname_
