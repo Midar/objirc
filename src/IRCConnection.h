@@ -110,6 +110,6 @@
      fromChannel: (IRCChannel*)channel
       withReason: (OFString*)reason;
 - (void)changeNicknameTo: (OFString*)nickname;
-- (void)process;
+- (void)processLine: (OFString*)line;
 - (void)handleConnection;
 @end

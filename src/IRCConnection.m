@@ -30,6 +30,8 @@
 
 #import <ObjFW/OFInvalidEncodingException.h>
 
+#import <ObjFW/macros.h>
+
 #import "IRCConnection.h"
 #import "IRCUser.h"
 #import "IRCChannel.h"
@@ -163,30 +165,11 @@
 	[self sendLineWithFormat: @"NICK %@", nickname_];
 }
 
-- (void)process
+- (void)processLine: (OFString*)line
 {
 	OFAutoreleasePool *pool = [[OFAutoreleasePool alloc] init];
-	OFString *line;
 	OFArray *split;
 	OFString *action = nil;
-
-	if (sock.atEndOfStream) {
-		if ([delegate respondsToSelector:
-		    @selector(connectionWasClosed:)])
-			[delegate connectionWasClosed: self];
-
-		return;
-	}
-
-	@try {
-		line = [sock tryReadLine];
-	} @catch (OFInvalidEncodingException *e) {
-		line = [sock tryReadLineWithEncoding:
-		    OF_STRING_ENCODING_WINDOWS_1252];
-	}
-
-	if (line == nil)
-		return;
 
 	if ([delegate respondsToSelector:
 	    @selector(connection:didReceiveLine:)])
@@ -502,10 +485,45 @@
 	}
 }
 
+-	  (BOOL)connection: (OFTCPSocket*)connection
+    didReceiveISO88591Line: (OFString*)line
+		 exception: (OFException*)exception
+{
+	if (line != nil) {
+		[self processLine: line];
+		[sock asyncReadLineWithTarget: self
+				     selector: @selector(connection:
+						   didReceiveLine:
+						   exception:)];
+	}
+
+	return NO;
+}
+
+- (BOOL)connection: (OFTCPSocket*)connection
+    didReceiveLine: (OFString*)line
+	 exception: (OFException*)exception
+{
+	if (line != nil) {
+		[self processLine: line];
+		return YES;
+	}
+
+	if ([exception isKindOfClass: [OFInvalidEncodingException class]])
+		[sock asyncReadLineWithEncoding: OF_STRING_ENCODING_ISO_8859_1
+					 target: self
+				       selector: @selector(connection:
+						     didReceiveISO88591Line:
+						     exception:)];
+
+	return NO;
+}
+
 - (void)handleConnection
 {
-	while (![sock isAtEndOfStream])
-		[self process];
+	[sock asyncReadLineWithTarget: self
+			     selector: @selector(connection:didReceiveLine:
+					   exception:)];
 }
 
 - (void)dealloc

@@ -20,6 +20,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#import <ObjFW/OFString.h>
+
 #import "IRCChannel.h"
 
 @implementation IRCChannel
