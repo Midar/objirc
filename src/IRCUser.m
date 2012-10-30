@@ -28,10 +28,11 @@
 #import <ObjFW/OFInvalidFormatException.h>
 #import <ObjFW/OFOutOfMemoryException.h>
 
+#import <ObjFW/macros.h>
+
 #import "IRCUser.h"
 
 @implementation IRCUser
-@synthesize username, nickname, hostname;
 + IRCUserWithString: (OFString*)string
 {
 	return [[[self alloc] initWithString: string] autorelease];
@@ -48,19 +49,19 @@
 
 		if ((tmp2 = strdup([string UTF8String])) == NULL)
 			@throw [OFOutOfMemoryException
-			     exceptionWithClass: isa
+			     exceptionWithClass: [self class]
 				  requestedSize: [string UTF8StringLength]];
 
 		if ((tmp = strchr(tmp2, '@')) == NULL)
 			@throw [OFInvalidFormatException
-			    exceptionWithClass: isa];
+			    exceptionWithClass: [self class]];
 
 		*tmp = '\0';
 		hostname = [[OFString alloc] initWithUTF8String: tmp + 1];
 
 		if ((tmp = strchr(tmp2, '!')) == NULL)
 			@throw [OFInvalidFormatException
-			    exceptionWithClass: isa];
+			    exceptionWithClass: [self class]];
 
 		*tmp = '\0';
 		username = [[OFString alloc] initWithUTF8String: tmp + 1];
@@ -84,6 +85,21 @@
 	[hostname release];
 
 	[super dealloc];
+}
+
+- (OFString*)username
+{
+	OF_GETTER(username, YES)
+}
+
+- (OFString*)nickname
+{
+	OF_GETTER(nickname, YES)
+}
+
+- (OFString*)hostname
+{
+	OF_GETTER(hostname, YES)
 }
 
 - copy

@@ -22,11 +22,11 @@
 
 #import <ObjFW/OFString.h>
 
+#import <ObjFW/macros.h>
+
 #import "IRCChannel.h"
 
 @implementation IRCChannel
-@synthesize name, users;
-
 + channelWithName: (OFString*)name
 {
 	return [[[self alloc] initWithName: name] autorelease];
@@ -55,9 +55,19 @@
 	[super dealloc];
 }
 
+- (OFString*)name
+{
+	OF_GETTER(name, YES)
+}
+
+- (OFSet*)users
+{
+	return [[users copy] autorelease];
+}
+
 - (OFString*)description
 {
-	return name;
+	return [[name copy] autorelease];
 }
 
 - (void)IRC_addUser: (OFString*)user

@@ -29,8 +29,13 @@
 	OFString *hostname;
 }
 
+#ifdef OF_HAVE_PROPERTIES
 @property (copy, readonly) OFString *nickname, *username, *hostname;
+#endif
 
 + IRCUserWithString: (OFString*)string;
 - initWithString: (OFString*)string;
+- (OFString*)nickname;
+- (OFString*)username;
+- (OFString*)hostname;
 @end

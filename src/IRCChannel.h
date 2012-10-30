@@ -31,11 +31,15 @@
 	OFMutableSet *users;
 }
 
+#ifdef OF_HAVE_PROPERTIES
 @property (readonly) OFString *name;
-@property (copy) OFSet *users;
+@property (readonly, copy) OFSet *users;
+#endif
 
 + channelWithName: (OFString*)name;
 - initWithName: (OFString*)name;
+- (OFString*)name;
+- (OFSet*)users;
 - (void)IRC_addUser: (OFString*)user;
 - (void)IRC_removeUser: (OFString*)user;
 @end

@@ -28,7 +28,7 @@
 #import "IRCUser.h"
 #import "IRCChannel.h"
 
-@interface TestApp: OFObject <OFApplicationDelegate, IRCConnectionDelegate>
+@interface TestApp: OFObject
 @end
 
 OF_APPLICATION_DELEGATE(TestApp)
@@ -38,11 +38,11 @@ OF_APPLICATION_DELEGATE(TestApp)
 {
 	IRCConnection *connection = [[IRCConnection alloc] init];
 
-	connection.server = @"irc.freenode.net";
-	connection.nickname = @"ObjIRC";
-	connection.username = @"ObjIRC";
-	connection.realname = @"ObjIRC";
-	connection.delegate = self;
+	[connection setServer: @"irc.freenode.net"];
+	[connection setNickname: @"ObjIRC"];
+	[connection setUsername: @"ObjIRC"];
+	[connection setRealname: @"ObjIRC"];
+	[connection setDelegate: self];
 
 	[connection connect];
 	[connection handleConnection];
@@ -136,6 +136,6 @@ OF_APPLICATION_DELEGATE(TestApp)
 -	   (void)connection: (IRCConnection*)connection
   didReceiveNamesForChannel: (IRCChannel*)channel
 {
-	of_log(@"Users in %@: %@", channel, channel.users);
+	of_log(@"Users in %@: %@", channel, [channel users]);
 }
 @end
