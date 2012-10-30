@@ -487,14 +487,16 @@
 
 -	  (BOOL)connection: (OFTCPSocket*)connection
     didReceiveISO88591Line: (OFString*)line
+		   context: (id)context
 		 exception: (OFException*)exception
 {
 	if (line != nil) {
 		[self processLine: line];
 		[sock asyncReadLineWithTarget: self
 				     selector: @selector(connection:
-						   didReceiveLine:
-						   exception:)];
+						   didReceiveLine:context:
+						   exception:)
+				      context: nil];
 	}
 
 	return NO;
@@ -502,6 +504,7 @@
 
 - (BOOL)connection: (OFTCPSocket*)connection
     didReceiveLine: (OFString*)line
+	   context: (id)context
 	 exception: (OFException*)exception
 {
 	if (line != nil) {
@@ -514,7 +517,8 @@
 					 target: self
 				       selector: @selector(connection:
 						     didReceiveISO88591Line:
-						     exception:)];
+						     context:exception:)
+					context: nil];
 
 	return NO;
 }
@@ -523,7 +527,8 @@
 {
 	[sock asyncReadLineWithTarget: self
 			     selector: @selector(connection:didReceiveLine:
-					   exception:)];
+					   context:exception:)
+			      context: nil];
 }
 
 - (void)dealloc
