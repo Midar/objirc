@@ -48,32 +48,32 @@
 - (void)connection: (IRCConnection*)connection
 	didSeeUser: (IRCUser*)user
       leaveChannel: (IRCChannel*)channel
-	withReason: (OFString*)reason;
+	    reason: (OFString*)reason;
 - (void)connection: (IRCConnection*)connection
         didSeeUser: (IRCUser*)user
   changeNicknameTo: (OFString*)nickname;
 - (void)connection: (IRCConnection*)connection
 	didSeeUser: (IRCUser*)user
 	  kickUser: (OFString*)kickedUser
-       fromChannel: (IRCChannel*)channel
-	withReason: (OFString*)reason;
+	   channel: (IRCChannel*)channel
+	    reason: (OFString*)reason;
 - (void)connection: (IRCConnection*)connection
     didSeeUserQuit: (IRCUser*)user
-	withReason: (OFString*)reason;
+	    reason: (OFString*)reason;
 -  (void)connection: (IRCConnection*)connection
   didReceiveMessage: (OFString*)msg
-	   fromUser: (IRCUser*)user
-	  inChannel: (IRCChannel*)channel;
+	       user: (IRCUser*)user
+	    channel: (IRCChannel*)channel;
 -	  (void)connection: (IRCConnection*)connection
   didReceivePrivateMessage: (OFString*)msg
-		  fromUser: (IRCUser*)user;
+		      user: (IRCUser*)user;
 - (void)connection: (IRCConnection*)connection
   didReceiveNotice: (OFString*)notice
-	  fromUser: (IRCUser*)user;
+	      user: (IRCUser*)user;
 - (void)connection: (IRCConnection*)connection
   didReceiveNotice: (OFString*)notice
-	  fromUser: (IRCUser*)user
-	 inChannel: (IRCChannel*)channel;
+	      user: (IRCUser*)user
+	   channel: (IRCChannel*)channel;
 -	   (void)connection: (IRCConnection*)connection
   didReceiveNamesForChannel: (IRCChannel*)channel;
 - (void)connectionWasClosed: (IRCConnection*)connection;
@@ -118,18 +118,18 @@
 - (void)joinChannel: (OFString*)channelName;
 - (void)leaveChannel: (IRCChannel*)channel;
 - (void)leaveChannel: (IRCChannel*)channel
-	  withReason: (OFString*)reason;
+	      reason: (OFString*)reason;
 - (void)sendMessage: (OFString*)msg
-	  toChannel: (IRCChannel*)channel;
+	    channel: (IRCChannel*)channel;
 - (void)sendMessage: (OFString*)msg
-	     toUser: (OFString*)user;
+	       user: (OFString*)user;
 - (void)sendNotice: (OFString*)notice
-	    toUser: (OFString*)user;
+	      user: (OFString*)user;
 - (void)sendNotice: (OFString*)notice
-	 toChannel: (IRCChannel*)channel;
+	   channel: (IRCChannel*)channel;
 - (void)kickUser: (OFString*)user
-     fromChannel: (IRCChannel*)channel
-      withReason: (OFString*)reason;
+	 channel: (IRCChannel*)channel
+	  reason: (OFString*)reason;
 - (void)changeNicknameTo: (OFString*)nickname;
 - (void)processLine: (OFString*)line;
 - (void)handleConnection;

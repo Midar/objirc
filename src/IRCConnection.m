@@ -154,11 +154,11 @@
 - (void)leaveChannel: (IRCChannel*)channel
 {
 	[self leaveChannel: channel
-		withReason: nil];
+		    reason: nil];
 }
 
 - (void)leaveChannel: (IRCChannel*)channel
-          withReason: (OFString*)reason
+	      reason: (OFString*)reason
 {
 	if (reason == nil)
 		[self sendLineWithFormat: @"PART %@", [channel name]];
@@ -194,32 +194,32 @@
 }
 
 - (void)sendMessage: (OFString*)msg
-	  toChannel: (IRCChannel*)channel
+	    channel: (IRCChannel*)channel
 {
 	[self sendLineWithFormat: @"PRIVMSG %@ :%@", [channel name], msg];
 }
 
 - (void)sendMessage: (OFString*)msg
-	     toUser: (OFString*)user
+	       user: (OFString*)user
 {
 	[self sendLineWithFormat: @"PRIVMSG %@ :%@", user, msg];
 }
 
 - (void)sendNotice: (OFString*)notice
-	    toUser: (OFString*)user
+	      user: (OFString*)user
 {
 	[self sendLineWithFormat: @"NOTICE %@ :%@", user, notice];
 }
 
 - (void)sendNotice: (OFString*)notice
-	 toChannel: (IRCChannel*)channel
+	   channel: (IRCChannel*)channel
 {
 	[self sendLineWithFormat: @"NOTICE %@ :%@", [channel name], notice];
 }
 
 - (void)kickUser: (OFString*)user
-     fromChannel: (IRCChannel*)channel
-      withReason: (OFString*)reason
+	 channel: (IRCChannel*)channel
+	  reason: (OFString*)reason
 {
 	[self sendLineWithFormat: @"KICK %@ %@ :%@",
 				  [channel name], user, reason];
@@ -349,7 +349,7 @@
 		[delegate connection: self
 			  didSeeUser: user
 			leaveChannel: channel
-			  withReason: reason];
+			      reason: reason];
 
 		return;
 	}
@@ -379,8 +379,8 @@
 		[delegate connection: self
 			  didSeeUser: user
 			    kickUser: whom
-			 fromChannel: channel
-			  withReason: reason];
+			     channel: channel
+			      reason: reason];
 
 		return;
 	}
@@ -408,7 +408,7 @@
 
 		[delegate connection: self
 		      didSeeUserQuit: user
-			  withReason: reason];
+			      reason: reason];
 
 		return;
 	}
@@ -469,12 +469,12 @@
 
 			[delegate connection: self
 			   didReceiveMessage: msg
-				    fromUser: user
-				   inChannel: channel];
+					user: user
+				     channel: channel];
 		} else
 			[delegate	  connection: self
 			    didReceivePrivateMessage: msg
-					    fromUser: user];
+						user: user];
 
 		return;
 	}
@@ -507,12 +507,12 @@
 
 			[delegate connection: self
 			    didReceiveNotice: notice
-				    fromUser: user
-				   inChannel: channel];
+					user: user
+				     channel: channel];
 		} else
 			[delegate connection: self
 			    didReceiveNotice: notice
-				    fromUser: user];
+					user: user];
 
 		return;
 	}
@@ -605,7 +605,7 @@
 - (void)connection: (IRCConnection*)connection
 	didSeeUser: (IRCUser*)user
       leaveChannel: (IRCChannel*)channel
-	withReason: (OFString*)reason
+	    reason: (OFString*)reason
 {
 }
 
@@ -618,40 +618,40 @@
 - (void)connection: (IRCConnection*)connection
 	didSeeUser: (IRCUser*)user
 	  kickUser: (OFString*)kickedUser
-       fromChannel: (IRCChannel*)channel
-	withReason: (OFString*)reason
+	   channel: (IRCChannel*)channel
+	    reason: (OFString*)reason
 {
 }
 
 - (void)connection: (IRCConnection*)connection
     didSeeUserQuit: (IRCUser*)user
-	withReason: (OFString*)reason
+	    reason: (OFString*)reason
 {
 }
 
 -  (void)connection: (IRCConnection*)connection
   didReceiveMessage: (OFString*)msg
 	   fromUser: (IRCUser*)user
-	  inChannel: (IRCChannel*)channel
+	    channel: (IRCChannel*)channel
 {
 }
 
 -	  (void)connection: (IRCConnection*)connection
   didReceivePrivateMessage: (OFString*)msg
-		  fromUser: (IRCUser*)user
+		      user: (IRCUser*)user
 {
 }
 
 - (void)connection: (IRCConnection*)connection
   didReceiveNotice: (OFString*)notice
-	  fromUser: (IRCUser*)user
+	      user: (IRCUser*)user
 {
 }
 
 - (void)connection: (IRCConnection*)connection
   didReceiveNotice: (OFString*)notice
-	  fromUser: (IRCUser*)user
-	 inChannel: (IRCChannel*)channel
+	      user: (IRCUser*)user
+	   channel: (IRCChannel*)channel
 {
 }
 
