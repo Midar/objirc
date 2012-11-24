@@ -7,8 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		4BBE6ECC1338258D007EE595 /* IRCChannel.h in Headers */ = {isa = PBXBuildFile; fileRef = 4BBE6EC81338258D007EE595 /* IRCChannel.h */; };
-		4BBE6ECD1338258D007EE595 /* IRCChannel.m in Sources */ = {isa = PBXBuildFile; fileRef = 4BBE6EC91338258D007EE595 /* IRCChannel.m */; };
 		4BBE6ECE1338258D007EE595 /* IRCConnection.h in Headers */ = {isa = PBXBuildFile; fileRef = 4BBE6ECA1338258D007EE595 /* IRCConnection.h */; };
 		4BBE6ECF1338258D007EE595 /* IRCConnection.m in Sources */ = {isa = PBXBuildFile; fileRef = 4BBE6ECB1338258D007EE595 /* IRCConnection.m */; };
 		4BBE6EE313382DAE007EE595 /* IRCUser.h in Headers */ = {isa = PBXBuildFile; fileRef = 4BBE6EE113382DAE007EE595 /* IRCUser.h */; };
@@ -44,8 +42,6 @@
 /* Begin PBXFileReference section */
 		4BBE6EB013382479007EE595 /* ObjIRC.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = ObjIRC.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		4BBE6EC713382541007EE595 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = SOURCE_ROOT; };
-		4BBE6EC81338258D007EE595 /* IRCChannel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = IRCChannel.h; path = src/IRCChannel.h; sourceTree = SOURCE_ROOT; };
-		4BBE6EC91338258D007EE595 /* IRCChannel.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = IRCChannel.m; path = src/IRCChannel.m; sourceTree = SOURCE_ROOT; };
 		4BBE6ECA1338258D007EE595 /* IRCConnection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = IRCConnection.h; path = src/IRCConnection.h; sourceTree = SOURCE_ROOT; };
 		4BBE6ECB1338258D007EE595 /* IRCConnection.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = IRCConnection.m; path = src/IRCConnection.m; sourceTree = SOURCE_ROOT; };
 		4BBE6EE113382DAE007EE595 /* IRCUser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = IRCUser.h; path = src/IRCUser.h; sourceTree = SOURCE_ROOT; };
@@ -109,8 +105,6 @@
 			children = (
 				4BBE6F0213383A19007EE595 /* Frameworks */,
 				4BBE6EBA1338247A007EE595 /* Supporting Files */,
-				4BBE6EC81338258D007EE595 /* IRCChannel.h */,
-				4BBE6EC91338258D007EE595 /* IRCChannel.m */,
 				4BBE6ECA1338258D007EE595 /* IRCConnection.h */,
 				4BBE6ECB1338258D007EE595 /* IRCConnection.m */,
 				4BBE6EE113382DAE007EE595 /* IRCUser.h */,
@@ -151,7 +145,6 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				4BBE6ECC1338258D007EE595 /* IRCChannel.h in Headers */,
 				4BBE6ECE1338258D007EE595 /* IRCConnection.h in Headers */,
 				4BBE6EE313382DAE007EE595 /* IRCUser.h in Headers */,
 			);
@@ -234,7 +227,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				4BBE6ECD1338258D007EE595 /* IRCChannel.m in Sources */,
 				4BBE6ECF1338258D007EE595 /* IRCConnection.m in Sources */,
 				4BBE6EE413382DAE007EE595 /* IRCUser.m in Sources */,
 			);

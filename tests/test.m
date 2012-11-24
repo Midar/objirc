@@ -26,7 +26,6 @@
 
 #import "IRCConnection.h"
 #import "IRCUser.h"
-#import "IRCChannel.h"
 
 @interface TestApp: OFObject
 @end
@@ -67,15 +66,15 @@ OF_APPLICATION_DELEGATE(TestApp)
 
 - (void)connection: (IRCConnection*)connection
 	didSeeUser: (IRCUser*)user
-       joinChannel: (IRCChannel*)channel
+       joinChannel: (OFString*)channel
 {
 	of_log(@"%@ joined %@.", user, channel);
 }
 
 - (void)connection: (IRCConnection*)connection
 	didSeeUser: (IRCUser*)user
-      leaveChannel: (IRCChannel*)channel
-	withReason: (OFString*)reason
+      leaveChannel: (OFString*)channel
+	    reason: (OFString*)reason
 {
 	of_log(@"%@ left %@ (%@).", user, channel, reason);
 }
@@ -83,15 +82,15 @@ OF_APPLICATION_DELEGATE(TestApp)
 -    (void)connection: (IRCConnection*)connection
 	   didSeeUser: (IRCUser*)user
 	     kickUser: (OFString*)kickedUser
-	  fromChannel: (IRCChannel*)channel
-	   withReason: (OFString*)reason
+	      channel: (OFString*)channel
+	       reason: (OFString*)reason
 {
 	of_log(@"%@ kicked %@ from %@: %@", user, kickedUser, channel, reason);
 }
 
 - (void)connection: (IRCConnection*)connection
     didSeeUserQuit: (IRCUser*)user
-	withReason: (OFString*)reason
+	    reason: (OFString*)reason
 {
 	of_log(@"%@ quit (%@).", user, reason);
 }
@@ -105,37 +104,38 @@ OF_APPLICATION_DELEGATE(TestApp)
 
 -  (void)connection: (IRCConnection*)connection
   didReceiveMessage: (OFString*)msg
-	   fromUser: (IRCUser*)user
-	  inChannel: (IRCChannel*)channel
+	    channel: (OFString*)channel
+	       user: (IRCUser*)user
 {
-	of_log(@"[%@] %@: %@", channel, user, msg);
+	of_log(@"[%@] %@: %@", channel, [user nickname], msg);
 }
 
 -	  (void)connection: (IRCConnection*)connection
   didReceivePrivateMessage: (OFString*)msg
-		  fromUser: (IRCUser*)user
+		      user: (IRCUser*)user
 {
 	of_log(@"(%@): %@", user, msg);
 }
 
 - (void)connection: (IRCConnection*)connection
   didReceiveNotice: (OFString*)notice
-	  fromUser: (IRCUser*)user
+	   channel: (OFString*)channel
+	      user: (IRCUser*)user
 {
-	of_log(@"NOTICE: (%@): %@", user, notice);
+	of_log(@"NOTICE: [%@] %@: %@", channel, [user nickname], notice);
 }
 
 - (void)connection: (IRCConnection*)connection
   didReceiveNotice: (OFString*)notice
-	  fromUser: (IRCUser*)user
-	 inChannel: (IRCChannel*)channel
+	      user: (IRCUser*)user
 {
-	of_log(@"NOTICE: [%@] %@: %@", channel, user, notice);
+	of_log(@"NOTICE: (%@): %@", user, notice);
 }
 
 -	   (void)connection: (IRCConnection*)connection
-  didReceiveNamesForChannel: (IRCChannel*)channel
+  didReceiveNamesForChannel: (OFString*)channel
 {
-	of_log(@"Users in %@: %@", channel, [channel users]);
+	of_log(@"Users in %@: %@", channel,
+	    [connection usersInChannel: channel]);
 }
 @end

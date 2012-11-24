@@ -20,14 +20,10 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#import <ObjFW/OFObject.h>
+#import <ObjFW/ObjFW.h>
 
-@class OFString;
-@class OFMutableDictionary;
-@class OFTCPSocket;
 @class IRCConnection;
 @class IRCUser;
-@class IRCChannel;
 
 #ifndef IRC_CONNECTION_M
 @protocol IRCConnectionDelegate <OFObject>
@@ -44,10 +40,10 @@
 - (void)connectionWasEstablished: (IRCConnection*)connection;
 - (void)connection: (IRCConnection*)connection
 	didSeeUser: (IRCUser*)user
-       joinChannel: (IRCChannel*)channel;
+       joinChannel: (OFString*)channel;
 - (void)connection: (IRCConnection*)connection
 	didSeeUser: (IRCUser*)user
-      leaveChannel: (IRCChannel*)channel
+      leaveChannel: (OFString*)channel
 	    reason: (OFString*)reason;
 - (void)connection: (IRCConnection*)connection
         didSeeUser: (IRCUser*)user
@@ -55,15 +51,15 @@
 - (void)connection: (IRCConnection*)connection
 	didSeeUser: (IRCUser*)user
 	  kickUser: (OFString*)kickedUser
-	   channel: (IRCChannel*)channel
+	   channel: (OFString*)channel
 	    reason: (OFString*)reason;
 - (void)connection: (IRCConnection*)connection
     didSeeUserQuit: (IRCUser*)user
 	    reason: (OFString*)reason;
 -  (void)connection: (IRCConnection*)connection
   didReceiveMessage: (OFString*)msg
-	       user: (IRCUser*)user
-	    channel: (IRCChannel*)channel;
+	    channel: (OFString*)channel
+	       user: (IRCUser*)user;
 -	  (void)connection: (IRCConnection*)connection
   didReceivePrivateMessage: (OFString*)msg
 		      user: (IRCUser*)user;
@@ -72,10 +68,10 @@
 	      user: (IRCUser*)user;
 - (void)connection: (IRCConnection*)connection
   didReceiveNotice: (OFString*)notice
-	      user: (IRCUser*)user
-	   channel: (IRCChannel*)channel;
+	   channel: (OFString*)channel
+	      user: (IRCUser*)user;
 -	   (void)connection: (IRCConnection*)connection
-  didReceiveNamesForChannel: (IRCChannel*)channel;
+  didReceiveNamesForChannel: (OFString*)channel;
 - (void)connectionWasClosed: (IRCConnection*)connection;
 @end
 
@@ -116,23 +112,20 @@
 - (void)disconnect;
 - (void)disconnectWithReason: (OFString*)reason;
 - (void)joinChannel: (OFString*)channelName;
-- (void)leaveChannel: (IRCChannel*)channel;
-- (void)leaveChannel: (IRCChannel*)channel
+- (void)leaveChannel: (OFString*)channel;
+- (void)leaveChannel: (OFString*)channel
 	      reason: (OFString*)reason;
 - (void)sendMessage: (OFString*)msg
-	    channel: (IRCChannel*)channel;
-- (void)sendMessage: (OFString*)msg
-	       user: (OFString*)user;
+		 to: (OFString*)to;
 - (void)sendNotice: (OFString*)notice
-	      user: (OFString*)user;
-- (void)sendNotice: (OFString*)notice
-	   channel: (IRCChannel*)channel;
+		to: (OFString*)to;
 - (void)kickUser: (OFString*)user
-	 channel: (IRCChannel*)channel
+	 channel: (OFString*)channel
 	  reason: (OFString*)reason;
 - (void)changeNicknameTo: (OFString*)nickname;
 - (void)processLine: (OFString*)line;
 - (void)handleConnection;
+- (OFSet*)usersInChannel: (OFString*)channel;
 @end
 
 @interface OFObject (IRCConnectionDelegate) <IRCConnectionDelegate>

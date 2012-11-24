@@ -36,7 +36,6 @@
 
 #import "IRCConnection.h"
 #import "IRCUser.h"
-#import "IRCChannel.h"
 
 @implementation IRCConnection
 - init
@@ -146,27 +145,26 @@
 		[self sendLineWithFormat: @"QUIT :%@", reason];
 }
 
-- (void)joinChannel: (OFString*)channelName
+- (void)joinChannel: (OFString*)channel
 {
-	[self sendLineWithFormat: @"JOIN %@", channelName];
+	[self sendLineWithFormat: @"JOIN %@", channel];
 }
 
-- (void)leaveChannel: (IRCChannel*)channel
+- (void)leaveChannel: (OFString*)channel
 {
 	[self leaveChannel: channel
 		    reason: nil];
 }
 
-- (void)leaveChannel: (IRCChannel*)channel
+- (void)leaveChannel: (OFString*)channel
 	      reason: (OFString*)reason
 {
 	if (reason == nil)
-		[self sendLineWithFormat: @"PART %@", [channel name]];
+		[self sendLineWithFormat: @"PART %@", channel];
 	else
-		[self sendLineWithFormat: @"PART %@ :%@",
-					  [channel name], reason];
+		[self sendLineWithFormat: @"PART %@ :%@", channel, reason];
 
-	[channels removeObjectForKey: [channel name]];
+	[channels removeObjectForKey: channel];
 }
 
 - (void)sendLine: (OFString*)line
@@ -194,35 +192,22 @@
 }
 
 - (void)sendMessage: (OFString*)msg
-	    channel: (IRCChannel*)channel
+		 to: (OFString*)to
 {
-	[self sendLineWithFormat: @"PRIVMSG %@ :%@", [channel name], msg];
-}
-
-- (void)sendMessage: (OFString*)msg
-	       user: (OFString*)user
-{
-	[self sendLineWithFormat: @"PRIVMSG %@ :%@", user, msg];
+	[self sendLineWithFormat: @"PRIVMSG %@ :%@", to, msg];
 }
 
 - (void)sendNotice: (OFString*)notice
-	      user: (OFString*)user
+		to: (OFString*)to
 {
-	[self sendLineWithFormat: @"NOTICE %@ :%@", user, notice];
-}
-
-- (void)sendNotice: (OFString*)notice
-	   channel: (IRCChannel*)channel
-{
-	[self sendLineWithFormat: @"NOTICE %@ :%@", [channel name], notice];
+	[self sendLineWithFormat: @"NOTICE %@ :%@", to, notice];
 }
 
 - (void)kickUser: (OFString*)user
-	 channel: (IRCChannel*)channel
+	 channel: (OFString*)channel
 	  reason: (OFString*)reason
 {
-	[self sendLineWithFormat: @"KICK %@ %@ :%@",
-				  [channel name], user, reason];
+	[self sendLineWithFormat: @"KICK %@ %@ :%@", channel, user, reason];
 }
 
 - (void)changeNicknameTo: (OFString*)nickname_
@@ -264,38 +249,39 @@
 		OFString *who = [components objectAtIndex: 0];
 		OFString *where = [components objectAtIndex: 2];
 		IRCUser *user;
-		IRCChannel *channel;
+		OFMutableSet *channel;
 
 		who = [who substringWithRange: of_range(1, [who length] - 1)];
 		user = [IRCUser IRCUserWithString: who];
 
 		if ([who hasPrefix: [nickname stringByAppendingString: @"!"]]) {
-			channel = [IRCChannel channelWithName: where];
+			channel = [OFMutableSet set];
 			[channels setObject: channel
 				     forKey: where];
 		} else
 			channel = [channels objectForKey: where];
 
-		[channel IRC_addUser: [user nickname]];
+		[channel addObject: [user nickname]];
 
 		[delegate connection: self
 			  didSeeUser: user
-			 joinChannel: channel];
+			 joinChannel: where];
 
 		return;
 	}
 
 	/* NAMES reply */
 	if ([action isEqual: @"353"] && [components count] >= 6) {
-		IRCChannel *channel;
+		OFString *where;
+		OFMutableSet *channel;
 		OFArray *users;
 		size_t pos;
 		OFEnumerator *enumerator;
 		OFString *user;
 
-		channel = [channels
-		    objectForKey: [components objectAtIndex: 4]];
-		if (channel == nil) {
+		where = [components objectAtIndex: 4];
+
+		if ((channel = [channels objectForKey: where]) == nil) {
 			/* We did not request that */
 			return;
 		}
@@ -317,11 +303,11 @@
 				user = [user substringWithRange:
 				    of_range(1, [user length] - 1)];
 
-			[channel IRC_addUser: user];
+			[channel addObject: user];
 		}
 
 		[delegate	   connection: self
-		    didReceiveNamesForChannel: channel];
+		    didReceiveNamesForChannel: where];
 
 		return;
 	}
@@ -331,7 +317,7 @@
 		OFString *who = [components objectAtIndex: 0];
 		OFString *where = [components objectAtIndex: 2];
 		IRCUser *user;
-		IRCChannel *channel;
+		OFMutableSet *channel;
 		OFString *reason = nil;
 		size_t pos = [who length] + 1 +
 		    [[components objectAtIndex: 1] length] + 1 + [where length];
@@ -344,11 +330,11 @@
 			reason = [line substringWithRange:
 			    of_range(pos + 2, [line length] - pos - 2)];
 
-		[channel IRC_removeUser: [user nickname]];
+		[channel removeObject: [user nickname]];
 
 		[delegate connection: self
 			  didSeeUser: user
-			leaveChannel: channel
+			leaveChannel: where
 			      reason: reason];
 
 		return;
@@ -360,7 +346,7 @@
 		OFString *where = [components objectAtIndex: 2];
 		OFString *whom = [components objectAtIndex: 3];
 		IRCUser *user;
-		IRCChannel *channel;
+		OFMutableSet *channel;
 		OFString *reason = nil;
 		size_t pos = [who length] + 1 +
 		    [[components objectAtIndex: 1] length] + 1 +
@@ -374,12 +360,12 @@
 			reason = [line substringWithRange:
 			    of_range(pos + 2, [line length] - pos - 2)];
 
-		[channel IRC_removeUser: [user nickname]];
+		[channel removeObject: [user nickname]];
 
 		[delegate connection: self
 			  didSeeUser: user
 			    kickUser: whom
-			     channel: channel
+			     channel: where
 			      reason: reason];
 
 		return;
@@ -393,7 +379,7 @@
 		size_t pos = [who length] + 1 +
 		    [[components objectAtIndex: 1] length];
 		OFEnumerator *enumerator;
-		IRCChannel *channel;
+		OFMutableSet *channel;
 
 		who = [who substringWithRange: of_range(1, [who length] - 1)];
 		user = [IRCUser IRCUserWithString: who];
@@ -402,9 +388,9 @@
 			reason = [line substringWithRange:
 			    of_range(pos + 2, [line length] - pos - 2)];
 
-		enumerator = [channels keyEnumerator];
+		enumerator = [channels objectEnumerator];
 		while ((channel = [enumerator nextObject]) != nil)
-			[channel IRC_removeUser: [user nickname]];
+			[channel removeObject: [user nickname]];
 
 		[delegate connection: self
 		      didSeeUserQuit: user
@@ -419,7 +405,7 @@
 		OFString *newNickname = [components objectAtIndex: 2];
 		IRCUser *user;
 		OFEnumerator *enumerator;
-		IRCChannel *channel;
+		OFMutableSet *channel;
 
 		who = [who substringWithRange: of_range(1, [who length] - 1)];
 		newNickname = [newNickname substringWithRange:
@@ -434,9 +420,9 @@
 
 		enumerator = [channels keyEnumerator];
 		while ((channel = [enumerator nextObject]) != nil) {
-			if ([[channel users] containsObject: [user nickname]]) {
-				[channel IRC_removeUser: [user nickname]];
-				[channel IRC_addUser: newNickname];
+			if ([channel containsObject: [user nickname]]) {
+				[channel removeObject: [user nickname]];
+				[channel addObject: newNickname];
 			}
 		}
 
@@ -462,16 +448,12 @@
 		    of_range(pos + 2, [line length] - pos - 2)];
 		user = [IRCUser IRCUserWithString: from];
 
-		if (![to isEqual: nickname]) {
-			IRCChannel *channel;
-
-			channel = [channels objectForKey: to];
-
+		if (![to isEqual: nickname])
 			[delegate connection: self
 			   didReceiveMessage: msg
-					user: user
-				     channel: channel];
-		} else
+				     channel: to
+					user: user];
+		else
 			[delegate	  connection: self
 			    didReceivePrivateMessage: msg
 						user: user];
@@ -500,16 +482,12 @@
 
 		user = [IRCUser IRCUserWithString: from];
 
-		if (![to isEqual: nickname]) {
-			IRCChannel *channel;
-
-			channel = [channels objectForKey: to];
-
+		if (![to isEqual: nickname])
 			[delegate connection: self
 			    didReceiveNotice: notice
-					user: user
-				     channel: channel];
-		} else
+				     channel: to
+					user: user];
+		else
 			[delegate connection: self
 			    didReceiveNotice: notice
 					user: user];
@@ -568,6 +546,11 @@
 					   exception:)];
 }
 
+- (OFSet*)usersInChannel: (OFString*)channel
+{
+	return [[[channels objectForKey: channel] copy] autorelease];
+}
+
 - (void)dealloc
 {
 	[sock release];
@@ -598,13 +581,13 @@
 
 - (void)connection: (IRCConnection*)connection
 	didSeeUser: (IRCUser*)user
-       joinChannel: (IRCChannel*)channel
+       joinChannel: (OFString*)channel
 {
 }
 
 - (void)connection: (IRCConnection*)connection
 	didSeeUser: (IRCUser*)user
-      leaveChannel: (IRCChannel*)channel
+      leaveChannel: (OFString*)channel
 	    reason: (OFString*)reason
 {
 }
@@ -618,7 +601,7 @@
 - (void)connection: (IRCConnection*)connection
 	didSeeUser: (IRCUser*)user
 	  kickUser: (OFString*)kickedUser
-	   channel: (IRCChannel*)channel
+	   channel: (OFString*)channel
 	    reason: (OFString*)reason
 {
 }
@@ -631,8 +614,8 @@
 
 -  (void)connection: (IRCConnection*)connection
   didReceiveMessage: (OFString*)msg
-	   fromUser: (IRCUser*)user
-	    channel: (IRCChannel*)channel
+	    channel: (OFString*)channel
+	       user: (IRCUser*)user
 {
 }
 
@@ -644,6 +627,7 @@
 
 - (void)connection: (IRCConnection*)connection
   didReceiveNotice: (OFString*)notice
+	   channel: (OFString*)channel
 	      user: (IRCUser*)user
 {
 }
@@ -651,12 +635,11 @@
 - (void)connection: (IRCConnection*)connection
   didReceiveNotice: (OFString*)notice
 	      user: (IRCUser*)user
-	   channel: (IRCChannel*)channel
 {
 }
 
 -	   (void)connection: (IRCConnection*)connection
-  didReceiveNamesForChannel: (IRCChannel*)channel
+  didReceiveNamesForChannel: (OFString*)channel
 {
 }
 
