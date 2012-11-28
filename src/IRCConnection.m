@@ -139,6 +139,8 @@
 
 - (void)disconnectWithReason: (OFString*)reason
 {
+	reason = [[reason componentsSeparatedByString: @"\n"] firstObject];
+
 	if (reason == nil)
 		[self sendLine: @"QUIT"];
 	else
@@ -147,6 +149,8 @@
 
 - (void)joinChannel: (OFString*)channel
 {
+	channel = [[channel componentsSeparatedByString: @"\n"] firstObject];
+
 	[self sendLineWithFormat: @"JOIN %@", channel];
 }
 
@@ -159,6 +163,9 @@
 - (void)leaveChannel: (OFString*)channel
 	      reason: (OFString*)reason
 {
+	channel = [[channel componentsSeparatedByString: @"\n"] firstObject];
+	reason = [[reason componentsSeparatedByString: @"\n"] firstObject];
+
 	if (reason == nil)
 		[self sendLineWithFormat: @"PART %@", channel];
 	else
@@ -194,24 +201,39 @@
 - (void)sendMessage: (OFString*)msg
 		 to: (OFString*)to
 {
-	[self sendLineWithFormat: @"PRIVMSG %@ :%@", to, msg];
+	OFArray *lines = [msg componentsSeparatedByString: @"\n"];
+	OFEnumerator *enumerator = [lines objectEnumerator];
+	OFString *line;
+
+	while ((line = [enumerator nextObject]) != nil)
+		[self sendLineWithFormat: @"PRIVMSG %@ :%@", to, line];
 }
 
 - (void)sendNotice: (OFString*)notice
 		to: (OFString*)to
 {
-	[self sendLineWithFormat: @"NOTICE %@ :%@", to, notice];
+	OFArray *lines = [notice componentsSeparatedByString: @"\n"];
+	OFEnumerator *enumerator = [lines objectEnumerator];
+	OFString *line;
+
+	while ((line = [enumerator nextObject]) != nil)
+		[self sendLineWithFormat: @"NOTICE %@ :%@", to, line];
 }
 
 - (void)kickUser: (OFString*)user
 	 channel: (OFString*)channel
 	  reason: (OFString*)reason
 {
+	reason = [[reason componentsSeparatedByString: @"\n"] firstObject];
+
 	[self sendLineWithFormat: @"KICK %@ %@ :%@", channel, user, reason];
 }
 
 - (void)changeNicknameTo: (OFString*)nickname_
 {
+	nickname_ = [[nickname_ componentsSeparatedByString: @"\n"]
+	    firstObject];
+
 	[self sendLineWithFormat: @"NICK %@", nickname_];
 }
 
