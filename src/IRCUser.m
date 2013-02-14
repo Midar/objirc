@@ -57,16 +57,16 @@
 			    exceptionWithClass: [self class]];
 
 		*tmp = '\0';
-		hostname = [[OFString alloc] initWithUTF8String: tmp + 1];
+		_hostname = [[OFString alloc] initWithUTF8String: tmp + 1];
 
 		if ((tmp = strchr(tmp2, '!')) == NULL)
 			@throw [OFInvalidFormatException
 			    exceptionWithClass: [self class]];
 
 		*tmp = '\0';
-		username = [[OFString alloc] initWithUTF8String: tmp + 1];
+		_username = [[OFString alloc] initWithUTF8String: tmp + 1];
 
-		nickname = [[OFString alloc] initWithUTF8String: tmp2];
+		_nickname = [[OFString alloc] initWithUTF8String: tmp2];
 	} @catch (id e) {
 		[self release];
 		@throw e;
@@ -80,26 +80,26 @@
 
 - (void)dealloc
 {
-	[nickname release];
-	[username release];
-	[hostname release];
+	[_nickname release];
+	[_username release];
+	[_hostname release];
 
 	[super dealloc];
 }
 
 - (OFString*)username
 {
-	OF_GETTER(username, YES)
+	OF_GETTER(_username, YES)
 }
 
 - (OFString*)nickname
 {
-	OF_GETTER(nickname, YES)
+	OF_GETTER(_nickname, YES)
 }
 
 - (OFString*)hostname
 {
-	OF_GETTER(hostname, YES)
+	OF_GETTER(_hostname, YES)
 }
 
 - copy
@@ -110,6 +110,6 @@
 - (OFString*)description
 {
 	return [OFString stringWithFormat: @"%@!%@@%@",
-					   nickname, username, hostname];
+					   _nickname, _username, _hostname];
 }
 @end

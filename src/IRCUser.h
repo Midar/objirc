@@ -24,9 +24,7 @@
 
 @interface IRCUser: OFObject <OFCopying>
 {
-	OFString *nickname;
-	OFString *username;
-	OFString *hostname;
+	OFString *_nickname, *_username, *_hostname;
 }
 
 #ifdef OF_HAVE_PROPERTIES

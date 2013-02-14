@@ -77,12 +77,12 @@
 
 @interface IRCConnection: OFObject
 {
-	OFTCPSocket *sock;
-	OFString *server;
-	uint16_t port;
-	OFString *nickname, *username, *realname;
-	OFMutableDictionary *channels;
-	id <IRCConnectionDelegate> delegate;
+	OFTCPSocket *_socket;
+	OFString *_server;
+	uint16_t _port;
+	OFString *_nickname, *_username, *_realname;
+	OFMutableDictionary *_channels;
+	id <IRCConnectionDelegate> _delegate;
 }
 
 #ifdef OF_HAVE_PROPERTIES

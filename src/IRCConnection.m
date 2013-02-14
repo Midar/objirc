@@ -43,8 +43,8 @@
 	self = [super init];
 
 	@try {
-		channels = [[OFMutableDictionary alloc] init];
-		port = 6667;
+		_channels = [[OFMutableDictionary alloc] init];
+		_port = 6667;
 	} @catch (id e) {
 		[self release];
 		@throw e;
@@ -53,81 +53,93 @@
 	return self;
 }
 
-- (void)setServer: (OFString*)server_
+- (void)dealloc
 {
-	OF_SETTER(server, server_, YES, YES)
+	[_socket release];
+	[_server release];
+	[_nickname release];
+	[_username release];
+	[_realname release];
+	[_channels release];
+
+	[super dealloc];
+}
+
+- (void)setServer: (OFString*)server
+{
+	OF_SETTER(_server, server, YES, YES)
 }
 
 - (OFString*)server
 {
-	OF_GETTER(server, YES)
+	OF_GETTER(_server, YES)
 }
 
-- (void)setPort: (uint16_t)port_
+- (void)setPort: (uint16_t)port
 {
-	port = port_;
+	_port = port;
 }
 
 - (uint16_t)port
 {
-	return port;
+	return _port;
 }
 
-- (void)setNickname: (OFString*)nickname_
+- (void)setNickname: (OFString*)nickname
 {
-	OF_SETTER(nickname, nickname_, YES, YES)
+	OF_SETTER(_nickname, nickname, YES, YES)
 }
 
 - (OFString*)nickname
 {
-	OF_GETTER(nickname, YES)
+	OF_GETTER(_nickname, YES)
 }
 
-- (void)setUsername: (OFString*)username_
+- (void)setUsername: (OFString*)username
 {
-	OF_SETTER(username, username_, YES, YES)
+	OF_SETTER(_username, username, YES, YES)
 }
 
 - (OFString*)username
 {
-	OF_GETTER(username, YES)
+	OF_GETTER(_username, YES)
 }
 
-- (void)setRealname: (OFString*)realname_
+- (void)setRealname: (OFString*)realname
 {
-	OF_SETTER(realname, realname_, YES, YES)
+	OF_SETTER(_realname, realname, YES, YES)
 }
 
 - (OFString*)realname
 {
-	OF_GETTER(realname, YES)
+	OF_GETTER(_realname, YES)
 }
 
-- (void)setDelegate: (id <IRCConnectionDelegate>)delegate_
+- (void)setDelegate: (id <IRCConnectionDelegate>)delegate
 {
-	delegate = delegate_;
+	_delegate = delegate;
 }
 
 - (id <IRCConnectionDelegate>)delegate
 {
-	return delegate;
+	OF_GETTER(_delegate, NO)
 }
 
 - (OFTCPSocket*)socket
 {
-	OF_GETTER(sock, YES)
+	OF_GETTER(_socket, YES)
 }
 
 - (void)connect
 {
 	OFAutoreleasePool *pool = [[OFAutoreleasePool alloc] init];
 
-	sock = [[OFTCPSocket alloc] init];
-	[sock connectToHost: server
-		       port: port];
+	_socket = [[OFTCPSocket alloc] init];
+	[_socket connectToHost: _server
+			  port: _port];
 
-	[self sendLineWithFormat: @"NICK %@", nickname];
-	[self sendLineWithFormat: @"USER %@ * 0 :%@", username, realname];
+	[self sendLineWithFormat: @"NICK %@", _nickname];
+	[self sendLineWithFormat: @"USER %@ * 0 :%@", _username, _realname];
 
 	[pool release];
 }
@@ -171,15 +183,15 @@
 	else
 		[self sendLineWithFormat: @"PART %@ :%@", channel, reason];
 
-	[channels removeObjectForKey: channel];
+	[_channels removeObjectForKey: channel];
 }
 
 - (void)sendLine: (OFString*)line
 {
-	[delegate connection: self
-		 didSendLine: line];
+	[_delegate connection: self
+		  didSendLine: line];
 
-	[sock writeLine: line];
+	[_socket writeLine: line];
 }
 
 - (void)sendLineWithFormat: (OFConstantString*)format, ...
@@ -229,12 +241,12 @@
 	[self sendLineWithFormat: @"KICK %@ %@ :%@", channel, user, reason];
 }
 
-- (void)changeNicknameTo: (OFString*)nickname_
+- (void)changeNicknameTo: (OFString*)nickname
 {
-	nickname_ = [[nickname_ componentsSeparatedByString: @"\n"]
+	nickname = [[nickname componentsSeparatedByString: @"\n"]
 	    firstObject];
 
-	[self sendLineWithFormat: @"NICK %@", nickname_];
+	[self sendLineWithFormat: @"NICK %@", nickname];
 }
 
 - (void)IRC_processLine: (OFString*)line
@@ -242,8 +254,8 @@
 	OFArray *components;
 	OFString *action = nil;
 
-	[delegate connection: self
-	      didReceiveLine: line];
+	[_delegate connection: self
+	       didReceiveLine: line];
 
 	components = [line componentsSeparatedByString: @" "];
 
@@ -262,7 +274,7 @@
 
 	/* Connected */
 	if ([action isEqual: @"001"] && [components count] >= 4) {
-		[delegate connectionWasEstablished: self];
+		[_delegate connectionWasEstablished: self];
 		return;
 	}
 
@@ -276,18 +288,19 @@
 		who = [who substringWithRange: of_range(1, [who length] - 1)];
 		user = [IRCUser IRCUserWithString: who];
 
-		if ([who hasPrefix: [nickname stringByAppendingString: @"!"]]) {
+		if ([who hasPrefix:
+		    [_nickname stringByAppendingString: @"!"]]) {
 			channel = [OFMutableSet set];
-			[channels setObject: channel
-				     forKey: where];
+			[_channels setObject: channel
+				      forKey: where];
 		} else
-			channel = [channels objectForKey: where];
+			channel = [_channels objectForKey: where];
 
 		[channel addObject: [user nickname]];
 
-		[delegate connection: self
-			  didSeeUser: user
-			 joinChannel: where];
+		[_delegate connection: self
+			   didSeeUser: user
+			  joinChannel: where];
 
 		return;
 	}
@@ -303,7 +316,7 @@
 
 		where = [components objectAtIndex: 4];
 
-		if ((channel = [channels objectForKey: where]) == nil) {
+		if ((channel = [_channels objectForKey: where]) == nil) {
 			/* We did not request that */
 			return;
 		}
@@ -328,7 +341,7 @@
 			[channel addObject: user];
 		}
 
-		[delegate	   connection: self
+		[_delegate	   connection: self
 		    didReceiveNamesForChannel: where];
 
 		return;
@@ -346,7 +359,7 @@
 
 		who = [who substringWithRange: of_range(1, [who length] - 1)];
 		user = [IRCUser IRCUserWithString: who];
-		channel = [channels objectForKey: where];
+		channel = [_channels objectForKey: where];
 
 		if ([components count] > 3)
 			reason = [line substringWithRange:
@@ -354,10 +367,10 @@
 
 		[channel removeObject: [user nickname]];
 
-		[delegate connection: self
-			  didSeeUser: user
-			leaveChannel: where
-			      reason: reason];
+		[_delegate connection: self
+			   didSeeUser: user
+			 leaveChannel: where
+			       reason: reason];
 
 		return;
 	}
@@ -376,7 +389,7 @@
 
 		who = [who substringWithRange: of_range(1, [who length] - 1)];
 		user = [IRCUser IRCUserWithString: who];
-		channel = [channels objectForKey: where];
+		channel = [_channels objectForKey: where];
 
 		if ([components count] > 4)
 			reason = [line substringWithRange:
@@ -384,11 +397,11 @@
 
 		[channel removeObject: [user nickname]];
 
-		[delegate connection: self
-			  didSeeUser: user
-			    kickUser: whom
-			     channel: where
-			      reason: reason];
+		[_delegate connection: self
+			   didSeeUser: user
+			     kickUser: whom
+			      channel: where
+			       reason: reason];
 
 		return;
 	}
@@ -410,13 +423,13 @@
 			reason = [line substringWithRange:
 			    of_range(pos + 2, [line length] - pos - 2)];
 
-		enumerator = [channels objectEnumerator];
+		enumerator = [_channels objectEnumerator];
 		while ((channel = [enumerator nextObject]) != nil)
 			[channel removeObject: [user nickname]];
 
-		[delegate connection: self
-		      didSeeUserQuit: user
-			      reason: reason];
+		[_delegate connection: self
+		       didSeeUserQuit: user
+			       reason: reason];
 
 		return;
 	}
@@ -424,33 +437,33 @@
 	/* NICK */
 	if ([action isEqual: @"NICK"] && [components count] == 3) {
 		OFString *who = [components objectAtIndex: 0];
-		OFString *newNickname = [components objectAtIndex: 2];
+		OFString *nickname = [components objectAtIndex: 2];
 		IRCUser *user;
 		OFEnumerator *enumerator;
 		OFMutableSet *channel;
 
 		who = [who substringWithRange: of_range(1, [who length] - 1)];
-		newNickname = [newNickname substringWithRange:
-		    of_range(1, [newNickname length] - 1)];
+		nickname = [nickname substringWithRange:
+		    of_range(1, [nickname length] - 1)];
 
 		user = [IRCUser IRCUserWithString: who];
 
-		if ([[user nickname] isEqual: nickname]) {
-			[nickname release];
-			nickname = [[user nickname] copy];
+		if ([[user nickname] isEqual: _nickname]) {
+			[_nickname release];
+			_nickname = [nickname copy];
 		}
 
-		enumerator = [channels keyEnumerator];
+		enumerator = [_channels keyEnumerator];
 		while ((channel = [enumerator nextObject]) != nil) {
 			if ([channel containsObject: [user nickname]]) {
 				[channel removeObject: [user nickname]];
-				[channel addObject: newNickname];
+				[channel addObject: nickname];
 			}
 		}
 
-		[delegate connection: self
-			  didSeeUser: user
-		    changeNicknameTo: newNickname];
+		[_delegate connection: self
+			   didSeeUser: user
+		     changeNicknameTo: nickname];
 
 		return;
 	}
@@ -470,13 +483,13 @@
 		    of_range(pos + 2, [line length] - pos - 2)];
 		user = [IRCUser IRCUserWithString: from];
 
-		if (![to isEqual: nickname])
-			[delegate connection: self
-			   didReceiveMessage: msg
-				     channel: to
-					user: user];
+		if (![to isEqual: _nickname])
+			[_delegate connection: self
+			    didReceiveMessage: msg
+				      channel: to
+					 user: user];
 		else
-			[delegate	  connection: self
+			[_delegate	  connection: self
 			    didReceivePrivateMessage: msg
 						user: user];
 
@@ -504,15 +517,15 @@
 
 		user = [IRCUser IRCUserWithString: from];
 
-		if (![to isEqual: nickname])
-			[delegate connection: self
-			    didReceiveNotice: notice
-				     channel: to
-					user: user];
+		if (![to isEqual: _nickname])
+			[_delegate connection: self
+			     didReceiveNotice: notice
+				      channel: to
+					 user: user];
 		else
-			[delegate connection: self
-			    didReceiveNotice: notice
-					user: user];
+			[_delegate connection: self
+			     didReceiveNotice: notice
+					 user: user];
 
 		return;
 	}
@@ -527,24 +540,24 @@
 	[pool release];
 }
 
--	  (BOOL)connection: (OFTCPSocket*)connection
-    didReceiveISO88591Line: (OFString*)line
-		 exception: (OFException*)exception
+-	    (BOOL)socket: (OFTCPSocket*)socket
+  didReceiveISO88591Line: (OFString*)line
+	       exception: (OFException*)exception
 {
 	if (line != nil) {
 		[self IRC_processLine: line];
-		[sock asyncReadLineWithTarget: self
-				     selector: @selector(connection:
-						   didReceiveLine:
-						   exception:)];
+		[socket asyncReadLineWithTarget: self
+				       selector: @selector(connection:
+						     didReceiveLine:
+						     exception:)];
 	}
 
 	return NO;
 }
 
-- (BOOL)connection: (OFTCPSocket*)connection
-    didReceiveLine: (OFString*)line
-	 exception: (OFException*)exception
+-   (BOOL)socket: (OFTCPSocket*)socket
+  didReceiveLine: (OFString*)line
+       exception: (OFException*)exception
 {
 	if (line != nil) {
 		[self IRC_processLine: line];
@@ -552,37 +565,25 @@
 	}
 
 	if ([exception isKindOfClass: [OFInvalidEncodingException class]])
-		[sock asyncReadLineWithEncoding: OF_STRING_ENCODING_ISO_8859_1
-					 target: self
-				       selector: @selector(connection:
-						     didReceiveISO88591Line:
-						     exception:)];
+		[socket asyncReadLineWithEncoding: OF_STRING_ENCODING_ISO_8859_1
+					   target: self
+					 selector: @selector(socket:
+						       didReceiveISO88591Line:
+						       exception:)];
 
 	return NO;
 }
 
 - (void)handleConnection
 {
-	[sock asyncReadLineWithTarget: self
-			     selector: @selector(connection:didReceiveLine:
-					   exception:)];
+	[_socket asyncReadLineWithTarget: self
+				selector: @selector(socket:didReceiveLine:
+					      exception:)];
 }
 
 - (OFSet*)usersInChannel: (OFString*)channel
 {
-	return [[[channels objectForKey: channel] copy] autorelease];
-}
-
-- (void)dealloc
-{
-	[sock release];
-	[server release];
-	[nickname release];
-	[username release];
-	[realname release];
-	[channels release];
-
-	[super dealloc];
+	return [[[_channels objectForKey: channel] copy] autorelease];
 }
 @end
 
