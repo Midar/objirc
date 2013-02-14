@@ -469,7 +469,7 @@
 			_nickname = [nickname copy];
 		}
 
-		enumerator = [_channels keyEnumerator];
+		enumerator = [_channels objectEnumerator];
 		while ((channel = [enumerator nextObject]) != nil) {
 			if ([channel containsObject: [user nickname]]) {
 				[channel removeObject: [user nickname]];
