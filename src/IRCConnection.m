@@ -188,8 +188,9 @@
 
 - (void)sendLine: (OFString*)line
 {
-	[_delegate connection: self
-		  didSendLine: line];
+	if ([_delegate respondsToSelector: @selector(connection:didSendLine:)])
+		[_delegate connection: self
+			  didSendLine: line];
 
 	[_socket writeLine: line];
 }
@@ -254,8 +255,10 @@
 	OFArray *components;
 	OFString *action = nil;
 
-	[_delegate connection: self
-	       didReceiveLine: line];
+	if ([_delegate respondsToSelector:
+	    @selector(connection:didReceiveLine:)])
+		[_delegate connection: self
+		       didReceiveLine: line];
 
 	components = [line componentsSeparatedByString: @" "];
 
@@ -274,7 +277,10 @@
 
 	/* Connected */
 	if ([action isEqual: @"001"] && [components count] >= 4) {
-		[_delegate connectionWasEstablished: self];
+		if ([_delegate respondsToSelector:
+		    @selector(connectionWasEstablished:)])
+			[_delegate connectionWasEstablished: self];
+
 		return;
 	}
 
@@ -298,9 +304,11 @@
 
 		[channel addObject: [user nickname]];
 
-		[_delegate connection: self
-			   didSeeUser: user
-			  joinChannel: where];
+		if ([_delegate respondsToSelector:
+		    @selector(connection:didSeeUser:joinChannel:)])
+			[_delegate connection: self
+				   didSeeUser: user
+				  joinChannel: where];
 
 		return;
 	}
@@ -341,8 +349,10 @@
 			[channel addObject: user];
 		}
 
-		[_delegate	   connection: self
-		    didReceiveNamesForChannel: where];
+		if ([_delegate respondsToSelector:
+		    @selector(connection:didReceiveNamesForChannel:)])
+			[_delegate	   connection: self
+			    didReceiveNamesForChannel: where];
 
 		return;
 	}
@@ -367,10 +377,12 @@
 
 		[channel removeObject: [user nickname]];
 
-		[_delegate connection: self
-			   didSeeUser: user
-			 leaveChannel: where
-			       reason: reason];
+		if ([_delegate respondsToSelector:
+		    @selector(connection:didSeeUser:leaveChannel:reason:)])
+			[_delegate connection: self
+				   didSeeUser: user
+				 leaveChannel: where
+				       reason: reason];
 
 		return;
 	}
@@ -397,11 +409,13 @@
 
 		[channel removeObject: [user nickname]];
 
-		[_delegate connection: self
-			   didSeeUser: user
-			     kickUser: whom
-			      channel: where
-			       reason: reason];
+		if ([_delegate respondsToSelector:
+		    @selector(connection:didSeeUser:kickUser:channel:reason:)])
+			[_delegate connection: self
+				   didSeeUser: user
+				     kickUser: whom
+				      channel: where
+				       reason: reason];
 
 		return;
 	}
@@ -427,9 +441,11 @@
 		while ((channel = [enumerator nextObject]) != nil)
 			[channel removeObject: [user nickname]];
 
-		[_delegate connection: self
-		       didSeeUserQuit: user
-			       reason: reason];
+		if ([_delegate respondsToSelector:
+		    @selector(connection:didSeeUserQuit:reason:)])
+			[_delegate connection: self
+			       didSeeUserQuit: user
+				       reason: reason];
 
 		return;
 	}
@@ -461,9 +477,11 @@
 			}
 		}
 
-		[_delegate connection: self
-			   didSeeUser: user
-		     changeNicknameTo: nickname];
+		if ([_delegate respondsToSelector:
+		    @selector(connection:didSeeUser:changeNicknameTo:)])
+			[_delegate connection: self
+				   didSeeUser: user
+			     changeNicknameTo: nickname];
 
 		return;
 	}
@@ -483,15 +501,20 @@
 		    of_range(pos + 2, [line length] - pos - 2)];
 		user = [IRCUser IRCUserWithString: from];
 
-		if (![to isEqual: _nickname])
-			[_delegate connection: self
-			    didReceiveMessage: msg
-				      channel: to
-					 user: user];
-		else
-			[_delegate	  connection: self
-			    didReceivePrivateMessage: msg
-						user: user];
+		if (![to isEqual: _nickname]) {
+			if ([_delegate respondsToSelector: @selector(connection:
+			    didReceiveMessage:channel:user:)])
+				[_delegate connection: self
+				    didReceiveMessage: msg
+					      channel: to
+						 user: user];
+		} else {
+			if ([_delegate respondsToSelector: @selector(connection:
+			    didReceivePrivateMessage:user:)])
+				[_delegate	  connection: self
+				    didReceivePrivateMessage: msg
+							user: user];
+		}
 
 		return;
 	}
@@ -517,15 +540,20 @@
 
 		user = [IRCUser IRCUserWithString: from];
 
-		if (![to isEqual: _nickname])
-			[_delegate connection: self
-			     didReceiveNotice: notice
-				      channel: to
-					 user: user];
-		else
-			[_delegate connection: self
-			     didReceiveNotice: notice
-					 user: user];
+		if (![to isEqual: _nickname]) {
+			if ([_delegate respondsToSelector: @selector(connection:
+			    didReceiveNotice:channel:user:)])
+				[_delegate connection: self
+				     didReceiveNotice: notice
+					      channel: to
+						 user: user];
+		} else {
+			if ([_delegate respondsToSelector:
+			    @selector(connection:didReceiveNotice:user:)])
+				[_delegate connection: self
+				     didReceiveNotice: notice
+						 user: user];
+		}
 
 		return;
 	}
@@ -584,89 +612,5 @@
 - (OFSet*)usersInChannel: (OFString*)channel
 {
 	return [[[_channels objectForKey: channel] copy] autorelease];
-}
-@end
-
-@implementation OFObject (IRCConnectionDelegate)
-- (void)connection: (IRCConnection*)connection
-    didReceiveLine: (OFString*)line
-{
-}
-
-- (void)connection: (IRCConnection*)connection
-       didSendLine: (OFString*)line
-{
-}
-
-- (void)connectionWasEstablished: (IRCConnection*)connection
-{
-}
-
-- (void)connection: (IRCConnection*)connection
-	didSeeUser: (IRCUser*)user
-       joinChannel: (OFString*)channel
-{
-}
-
-- (void)connection: (IRCConnection*)connection
-	didSeeUser: (IRCUser*)user
-      leaveChannel: (OFString*)channel
-	    reason: (OFString*)reason
-{
-}
-
-- (void)connection: (IRCConnection*)connection
-        didSeeUser: (IRCUser*)user
-  changeNicknameTo: (OFString*)nickname
-{
-}
-
-- (void)connection: (IRCConnection*)connection
-	didSeeUser: (IRCUser*)user
-	  kickUser: (OFString*)kickedUser
-	   channel: (OFString*)channel
-	    reason: (OFString*)reason
-{
-}
-
-- (void)connection: (IRCConnection*)connection
-    didSeeUserQuit: (IRCUser*)user
-	    reason: (OFString*)reason
-{
-}
-
--  (void)connection: (IRCConnection*)connection
-  didReceiveMessage: (OFString*)msg
-	    channel: (OFString*)channel
-	       user: (IRCUser*)user
-{
-}
-
--	  (void)connection: (IRCConnection*)connection
-  didReceivePrivateMessage: (OFString*)msg
-		      user: (IRCUser*)user
-{
-}
-
-- (void)connection: (IRCConnection*)connection
-  didReceiveNotice: (OFString*)notice
-	   channel: (OFString*)channel
-	      user: (IRCUser*)user
-{
-}
-
-- (void)connection: (IRCConnection*)connection
-  didReceiveNotice: (OFString*)notice
-	      user: (IRCUser*)user
-{
-}
-
--	   (void)connection: (IRCConnection*)connection
-  didReceiveNamesForChannel: (OFString*)channel
-{
-}
-
-- (void)connectionWasClosed: (IRCConnection*)connection
-{
 }
 @end

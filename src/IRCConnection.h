@@ -25,11 +25,7 @@
 @class IRCConnection;
 @class IRCUser;
 
-#ifndef IRC_CONNECTION_M
 @protocol IRCConnectionDelegate <OFObject>
-#else
-@protocol IRCConnectionDelegate
-#endif
 #ifdef OF_HAVE_OPTIONAL_PROTOCOLS
 @optional
 #endif
