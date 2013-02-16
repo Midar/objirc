@@ -575,7 +575,7 @@
 	if (line != nil) {
 		[self IRC_processLine: line];
 		[socket asyncReadLineWithTarget: self
-				       selector: @selector(connection:
+				       selector: @selector(socket:
 						     didReceiveLine:
 						     exception:)];
 	}
