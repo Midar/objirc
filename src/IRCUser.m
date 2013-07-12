@@ -33,7 +33,7 @@
 #import "IRCUser.h"
 
 @implementation IRCUser
-+ IRCUserWithString: (OFString*)string
++ (instancetype)IRCUserWithString: (OFString*)string
 {
 	return [[[self alloc] initWithString: string] autorelease];
 }
@@ -49,19 +49,17 @@
 
 		if ((tmp2 = strdup([string UTF8String])) == NULL)
 			@throw [OFOutOfMemoryException
-			     exceptionWithClass: [self class]
-				  requestedSize: [string UTF8StringLength]];
+			     exceptionWithRequestedSize:
+			     [string UTF8StringLength]];
 
 		if ((tmp = strchr(tmp2, '@')) == NULL)
-			@throw [OFInvalidFormatException
-			    exceptionWithClass: [self class]];
+			@throw [OFInvalidFormatException exception];
 
 		*tmp = '\0';
 		_hostname = [[OFString alloc] initWithUTF8String: tmp + 1];
 
 		if ((tmp = strchr(tmp2, '!')) == NULL)
-			@throw [OFInvalidFormatException
-			    exceptionWithClass: [self class]];
+			@throw [OFInvalidFormatException exception];
 
 		*tmp = '\0';
 		_username = [[OFString alloc] initWithUTF8String: tmp + 1];
@@ -89,17 +87,17 @@
 
 - (OFString*)username
 {
-	OF_GETTER(_username, YES)
+	OF_GETTER(_username, true)
 }
 
 - (OFString*)nickname
 {
-	OF_GETTER(_nickname, YES)
+	OF_GETTER(_nickname, true)
 }
 
 - (OFString*)hostname
 {
-	OF_GETTER(_hostname, YES)
+	OF_GETTER(_hostname, true)
 }
 
 - copy

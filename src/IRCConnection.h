@@ -89,6 +89,7 @@
 @property (readonly, retain) OFTCPSocket *socket;
 #endif
 
++ (instancetype)connection;
 - (void)setServer: (OFString*)server;
 - (OFString*)server;
 - (void)setPort: (uint16_t)port;

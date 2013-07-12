@@ -38,6 +38,11 @@
 #import "IRCUser.h"
 
 @implementation IRCConnection
++ (instancetype)connection
+{
+	return [[[self alloc] init] autorelease];
+}
+
 - init
 {
 	self = [super init];
@@ -67,12 +72,12 @@
 
 - (void)setServer: (OFString*)server
 {
-	OF_SETTER(_server, server, YES, YES)
+	OF_SETTER(_server, server, true, 1)
 }
 
 - (OFString*)server
 {
-	OF_GETTER(_server, YES)
+	OF_GETTER(_server, true)
 }
 
 - (void)setPort: (uint16_t)port
@@ -87,32 +92,32 @@
 
 - (void)setNickname: (OFString*)nickname
 {
-	OF_SETTER(_nickname, nickname, YES, YES)
+	OF_SETTER(_nickname, nickname, true, 1)
 }
 
 - (OFString*)nickname
 {
-	OF_GETTER(_nickname, YES)
+	OF_GETTER(_nickname, true)
 }
 
 - (void)setUsername: (OFString*)username
 {
-	OF_SETTER(_username, username, YES, YES)
+	OF_SETTER(_username, username, true, 1)
 }
 
 - (OFString*)username
 {
-	OF_GETTER(_username, YES)
+	OF_GETTER(_username, true)
 }
 
 - (void)setRealname: (OFString*)realname
 {
-	OF_SETTER(_realname, realname, YES, YES)
+	OF_SETTER(_realname, realname, true, 1)
 }
 
 - (OFString*)realname
 {
-	OF_GETTER(_realname, YES)
+	OF_GETTER(_realname, true)
 }
 
 - (void)setDelegate: (id <IRCConnectionDelegate>)delegate
@@ -122,17 +127,20 @@
 
 - (id <IRCConnectionDelegate>)delegate
 {
-	OF_GETTER(_delegate, NO)
+	OF_GETTER(_delegate, false)
 }
 
 - (OFTCPSocket*)socket
 {
-	OF_GETTER(_socket, YES)
+	OF_GETTER(_socket, true)
 }
 
 - (void)connect
 {
 	OFAutoreleasePool *pool = [[OFAutoreleasePool alloc] init];
+
+	if (_socket != nil)
+		@throw [OFAlreadyConnectedException exception];
 
 	_socket = [[OFTCPSocket alloc] init];
 	[_socket connectToHost: _server
@@ -568,7 +576,7 @@
 	[pool release];
 }
 
--	    (BOOL)socket: (OFTCPSocket*)socket
+-	    (bool)socket: (OFTCPSocket*)socket
   didReceiveISO88591Line: (OFString*)line
 	       exception: (OFException*)exception
 {
@@ -580,26 +588,34 @@
 						     exception:)];
 	}
 
-	return NO;
+	return false;
 }
 
--   (BOOL)socket: (OFTCPSocket*)socket
+-   (bool)socket: (OFTCPSocket*)socket
   didReceiveLine: (OFString*)line
        exception: (OFException*)exception
 {
 	if (line != nil) {
 		[self IRC_processLine: line];
-		return YES;
+		return true;
 	}
 
-	if ([exception isKindOfClass: [OFInvalidEncodingException class]])
+	if ([exception isKindOfClass: [OFInvalidEncodingException class]]) {
 		[socket asyncReadLineWithEncoding: OF_STRING_ENCODING_ISO_8859_1
 					   target: self
 					 selector: @selector(socket:
 						       didReceiveISO88591Line:
 						       exception:)];
+		return false;
+	}
 
-	return NO;
+	if ([_delegate respondsToSelector: @selector(connectionWasClosed:)]) {
+		[_delegate connectionWasClosed: self];
+		[_socket release];
+		_socket = nil;
+	}
+
+	return false;
 }
 
 - (void)handleConnection
