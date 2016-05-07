@@ -26,9 +26,7 @@
 @class IRCUser;
 
 @protocol IRCConnectionDelegate <OFObject>
-#ifdef OF_HAVE_OPTIONAL_PROTOCOLS
 @optional
-#endif
 - (void)connection: (IRCConnection*)connection
     didReceiveLine: (OFString*)line;
 - (void)connection: (IRCConnection*)connection
@@ -81,28 +79,13 @@
 	id <IRCConnectionDelegate> _delegate;
 }
 
-#ifdef OF_HAVE_PROPERTIES
 @property (copy) OFString *server;
 @property (assign) uint16_t port;
 @property (copy) OFString *nickname, *username, *realname;
 @property (assign) id <IRCConnectionDelegate> delegate;
 @property (readonly, retain) OFTCPSocket *socket;
-#endif
 
 + (instancetype)connection;
-- (void)setServer: (OFString*)server;
-- (OFString*)server;
-- (void)setPort: (uint16_t)port;
-- (uint16_t)port;
-- (void)setNickname: (OFString*)nickname;
-- (OFString*)nickname;
-- (void)setUsername: (OFString*)username;
-- (OFString*)username;
-- (void)setRealname: (OFString*)realname;
-- (OFString*)realname;
-- (void)setDelegate: (id <IRCConnectionDelegate>)delegate;
-- (id <IRCConnectionDelegate>)delegate;
-- (OFTCPSocket*)socket;
 - (void)sendLine: (OFString*)line;
 - (void)sendLineWithFormat: (OFConstantString*)line, ...;
 - (void)connect;
@@ -123,7 +106,4 @@
 - (void)processLine: (OFString*)line;
 - (void)handleConnection;
 - (OFSet*)usersInChannel: (OFString*)channel;
-@end
-
-@interface OFObject (IRCConnectionDelegate) <IRCConnectionDelegate>
 @end

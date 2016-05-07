@@ -28,7 +28,6 @@
 #import <ObjFW/OFArray.h>
 #import <ObjFW/OFMutableDictionary.h>
 #import <ObjFW/OFTCPSocket.h>
-#import <ObjFW/OFAutoreleasePool.h>
 
 #import <ObjFW/OFInvalidEncodingException.h>
 
@@ -38,6 +37,10 @@
 #import "IRCUser.h"
 
 @implementation IRCConnection
+@synthesize server = _server, port = _port;
+@synthesize nickname = _nickname, username = _username, realname = _realname;
+@synthesize delegate = _delegate, socket = _socket;
+
 + (instancetype)connection
 {
 	return [[[self alloc] init] autorelease];
@@ -70,74 +73,9 @@
 	[super dealloc];
 }
 
-- (void)setServer: (OFString*)server
-{
-	OF_SETTER(_server, server, true, 1)
-}
-
-- (OFString*)server
-{
-	OF_GETTER(_server, true)
-}
-
-- (void)setPort: (uint16_t)port
-{
-	_port = port;
-}
-
-- (uint16_t)port
-{
-	return _port;
-}
-
-- (void)setNickname: (OFString*)nickname
-{
-	OF_SETTER(_nickname, nickname, true, 1)
-}
-
-- (OFString*)nickname
-{
-	OF_GETTER(_nickname, true)
-}
-
-- (void)setUsername: (OFString*)username
-{
-	OF_SETTER(_username, username, true, 1)
-}
-
-- (OFString*)username
-{
-	OF_GETTER(_username, true)
-}
-
-- (void)setRealname: (OFString*)realname
-{
-	OF_SETTER(_realname, realname, true, 1)
-}
-
-- (OFString*)realname
-{
-	OF_GETTER(_realname, true)
-}
-
-- (void)setDelegate: (id <IRCConnectionDelegate>)delegate
-{
-	_delegate = delegate;
-}
-
-- (id <IRCConnectionDelegate>)delegate
-{
-	OF_GETTER(_delegate, false)
-}
-
-- (OFTCPSocket*)socket
-{
-	OF_GETTER(_socket, true)
-}
-
 - (void)connect
 {
-	OFAutoreleasePool *pool = [[OFAutoreleasePool alloc] init];
+	void *pool = objc_autoreleasePoolPush();
 
 	if (_socket != nil)
 		@throw [OFAlreadyConnectedException exception];
@@ -149,7 +87,7 @@
 	[self sendLineWithFormat: @"NICK %@", _nickname];
 	[self sendLineWithFormat: @"USER %@ * 0 :%@", _username, _realname];
 
-	[pool release];
+	objc_autoreleasePoolPop(pool);
 }
 
 - (void)disconnect
@@ -159,19 +97,27 @@
 
 - (void)disconnectWithReason: (OFString*)reason
 {
+	void *pool = objc_autoreleasePoolPush();
+
 	reason = [[reason componentsSeparatedByString: @"\n"] firstObject];
 
 	if (reason == nil)
 		[self sendLine: @"QUIT"];
 	else
 		[self sendLineWithFormat: @"QUIT :%@", reason];
+
+	objc_autoreleasePoolPop(pool);
 }
 
 - (void)joinChannel: (OFString*)channel
 {
+	void *pool = objc_autoreleasePoolPush();
+
 	channel = [[channel componentsSeparatedByString: @"\n"] firstObject];
 
 	[self sendLineWithFormat: @"JOIN %@", channel];
+
+	objc_autoreleasePoolPop(pool);
 }
 
 - (void)leaveChannel: (OFString*)channel
@@ -183,6 +129,8 @@
 - (void)leaveChannel: (OFString*)channel
 	      reason: (OFString*)reason
 {
+	void *pool = objc_autoreleasePoolPush();
+
 	channel = [[channel componentsSeparatedByString: @"\n"] firstObject];
 	reason = [[reason componentsSeparatedByString: @"\n"] firstObject];
 
@@ -192,6 +140,8 @@
 		[self sendLineWithFormat: @"PART %@ :%@", channel, reason];
 
 	[_channels removeObjectForKey: channel];
+
+	objc_autoreleasePoolPop(pool);
 }
 
 - (void)sendLine: (OFString*)line
@@ -205,7 +155,7 @@
 
 - (void)sendLineWithFormat: (OFConstantString*)format, ...
 {
-	OFAutoreleasePool *pool = [[OFAutoreleasePool alloc] init];
+	void *pool = objc_autoreleasePoolPush();
 	OFString *line;
 	va_list args;
 
@@ -216,46 +166,54 @@
 
 	[self sendLine: line];
 
-	[pool release];
+	objc_autoreleasePoolPop(pool);
 }
 
 - (void)sendMessage: (OFString*)msg
 		 to: (OFString*)to
 {
-	OFArray *lines = [msg componentsSeparatedByString: @"\n"];
-	OFEnumerator *enumerator = [lines objectEnumerator];
-	OFString *line;
+	void *pool = objc_autoreleasePoolPush();
 
-	while ((line = [enumerator nextObject]) != nil)
+	for (OFString *line in [msg componentsSeparatedByString: @"\n"])
 		[self sendLineWithFormat: @"PRIVMSG %@ :%@", to, line];
+
+	objc_autoreleasePoolPop(pool);
 }
 
 - (void)sendNotice: (OFString*)notice
 		to: (OFString*)to
 {
-	OFArray *lines = [notice componentsSeparatedByString: @"\n"];
-	OFEnumerator *enumerator = [lines objectEnumerator];
-	OFString *line;
+	void *pool = objc_autoreleasePoolPush();
 
-	while ((line = [enumerator nextObject]) != nil)
+	for (OFString *line in [notice componentsSeparatedByString: @"\n"])
 		[self sendLineWithFormat: @"NOTICE %@ :%@", to, line];
+
+	objc_autoreleasePoolPop(pool);
 }
 
 - (void)kickUser: (OFString*)user
 	 channel: (OFString*)channel
 	  reason: (OFString*)reason
 {
+	void *pool = objc_autoreleasePoolPush();
+
 	reason = [[reason componentsSeparatedByString: @"\n"] firstObject];
 
 	[self sendLineWithFormat: @"KICK %@ %@ :%@", channel, user, reason];
+
+	objc_autoreleasePoolPop(pool);
 }
 
 - (void)changeNicknameTo: (OFString*)nickname
 {
+	void *pool = objc_autoreleasePoolPush();
+
 	nickname = [[nickname componentsSeparatedByString: @"\n"]
 	    firstObject];
 
 	[self sendLineWithFormat: @"NICK %@", nickname];
+
+	objc_autoreleasePoolPop(pool);
 }
 
 - (void)IRC_processLine: (OFString*)line
@@ -327,8 +285,6 @@
 		OFMutableSet *channel;
 		OFArray *users;
 		size_t pos;
-		OFEnumerator *enumerator;
-		OFString *user;
 
 		where = [components objectAtIndex: 4];
 
@@ -347,8 +303,7 @@
 		    of_range(pos, [line length] - pos)]
 		    componentsSeparatedByString: @" "];
 
-		enumerator = [users objectEnumerator];
-		while ((user = [enumerator nextObject]) != nil) {
+		for (OFString *user in users) {
 			if ([user hasPrefix: @"@"] || [user hasPrefix: @"+"] ||
 			    [user hasPrefix: @"%"] || [user hasPrefix: @"*"])
 				user = [user substringWithRange:
@@ -435,8 +390,6 @@
 		OFString *reason = nil;
 		size_t pos = [who length] + 1 +
 		    [[components objectAtIndex: 1] length];
-		OFEnumerator *enumerator;
-		OFMutableSet *channel;
 
 		who = [who substringWithRange: of_range(1, [who length] - 1)];
 		user = [IRCUser IRCUserWithString: who];
@@ -445,8 +398,7 @@
 			reason = [line substringWithRange:
 			    of_range(pos + 2, [line length] - pos - 2)];
 
-		enumerator = [_channels objectEnumerator];
-		while ((channel = [enumerator nextObject]) != nil)
+		for (OFMutableSet *channel in _channels)
 			[channel removeObject: [user nickname]];
 
 		if ([_delegate respondsToSelector:
@@ -463,8 +415,6 @@
 		OFString *who = [components objectAtIndex: 0];
 		OFString *nickname = [components objectAtIndex: 2];
 		IRCUser *user;
-		OFEnumerator *enumerator;
-		OFMutableSet *channel;
 
 		who = [who substringWithRange: of_range(1, [who length] - 1)];
 		nickname = [nickname substringWithRange:
@@ -477,8 +427,7 @@
 			_nickname = [nickname copy];
 		}
 
-		enumerator = [_channels objectEnumerator];
-		while ((channel = [enumerator nextObject]) != nil) {
+		for (OFMutableSet *channel in _channels) {
 			if ([channel containsObject: [user nickname]]) {
 				[channel removeObject: [user nickname]];
 				[channel addObject: nickname];
@@ -569,11 +518,11 @@
 
 - (void)processLine: (OFString*)line
 {
-	OFAutoreleasePool *pool = [[OFAutoreleasePool alloc] init];
+	void *pool = objc_autoreleasePoolPush();
 
 	[self IRC_processLine: line];
 
-	[pool release];
+	objc_autoreleasePoolPop(pool);
 }
 
 -	    (bool)socket: (OFTCPSocket*)socket

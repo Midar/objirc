@@ -27,7 +27,7 @@
 #import "IRCConnection.h"
 #import "IRCUser.h"
 
-@interface TestApp: OFObject
+@interface TestApp: OFObject <OFApplicationDelegate, IRCConnectionDelegate>
 @end
 
 OF_APPLICATION_DELEGATE(TestApp)

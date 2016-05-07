@@ -33,6 +33,8 @@
 #import "IRCUser.h"
 
 @implementation IRCUser
+@synthesize username = _username, nickname = _nickname, hostname = _hostname;
+
 + (instancetype)IRCUserWithString: (OFString*)string
 {
 	return [[[self alloc] initWithString: string] autorelease];
@@ -83,21 +85,6 @@
 	[_hostname release];
 
 	[super dealloc];
-}
-
-- (OFString*)username
-{
-	OF_GETTER(_username, true)
-}
-
-- (OFString*)nickname
-{
-	OF_GETTER(_nickname, true)
-}
-
-- (OFString*)hostname
-{
-	OF_GETTER(_hostname, true)
 }
 
 - copy
