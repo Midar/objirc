@@ -1,7 +1,8 @@
 /*
- * Copyright (c) 2010, 2011, Jonathan Schleifer <js@webkeks.org>
+ * Copyright (c) 2010, 2011, 2012, 2013, 2016
+ *   Jonathan Schleifer <js@heap.zone>
  *
- * https://webkeks.org/git/?p=objirc.git
+ * https://heap.zone/git/?p=objirc.git
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
