@@ -232,8 +232,8 @@
 	if ([components count] == 2 &&
 	    [[components firstObject] isEqual: @"PING"]) {
 		OFMutableString *s = [[line mutableCopy] autorelease];
-		[s replaceOccurrencesOfString: @"PING"
-				   withString: @"PONG"];
+		[s replaceCharactersInRange: of_range(0, 4)
+				 withString: @"PONG"];
 		[self sendLine: s];
 
 		return;
