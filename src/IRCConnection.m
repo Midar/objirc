@@ -399,8 +399,9 @@
 			reason = [line substringWithRange:
 			    of_range(pos + 2, [line length] - pos - 2)];
 
-		for (OFMutableSet *channel in _channels)
-			[channel removeObject: [user nickname]];
+		for (OFString *channel in _channels)
+			[[_channels objectForKey: channel]
+			    removeObject: [user nickname]];
 
 		if ([_delegate respondsToSelector:
 		    @selector(connection:didSeeUserQuit:reason:)])
