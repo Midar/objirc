@@ -81,14 +81,16 @@
 	OFString *_nickname, *_username, *_realname;
 	OFMutableDictionary *_channels;
 	id <IRCConnectionDelegate> _delegate;
+	of_string_encoding_t _fallbackEncoding;
 }
 
 @property (assign) Class socketClass;
 @property (copy) OFString *server;
-@property (assign) uint16_t port;
+@property uint16_t port;
 @property (copy) OFString *nickname, *username, *realname;
 @property (assign) id <IRCConnectionDelegate> delegate;
 @property (readonly, retain) OFTCPSocket *socket;
+@property of_string_encoding_t fallbackEncoding;
 
 + (instancetype)connection;
 - (void)sendLine: (OFString*)line;

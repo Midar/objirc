@@ -42,6 +42,7 @@
 @synthesize server = _server, port = _port;
 @synthesize nickname = _nickname, username = _username, realname = _realname;
 @synthesize delegate = _delegate, socket = _socket;
+@synthesize fallbackEncoding = _fallbackEncoding;
 
 + (instancetype)connection
 {
@@ -56,6 +57,7 @@
 		_socketClass = [OFTCPSocket class];
 		_channels = [[OFMutableDictionary alloc] init];
 		_port = 6667;
+		_fallbackEncoding = OF_STRING_ENCODING_ISO_8859_1;
 	} @catch (id e) {
 		[self release];
 		@throw e;
@@ -534,9 +536,9 @@
 	objc_autoreleasePoolPop(pool);
 }
 
--	    (bool)socket: (OFTCPSocket*)socket
-  didReceiveISO88591Line: (OFString*)line
-	       exception: (OFException*)exception
+-		  (bool)socket: (OFTCPSocket*)socket
+  didReceiveWronglyEncodedLine: (OFString*)line
+		     exception: (OFException*)exception
 {
 	if (line != nil) {
 		[self IRC_processLine: line];
@@ -559,11 +561,12 @@
 	}
 
 	if ([exception isKindOfClass: [OFInvalidEncodingException class]]) {
-		[socket asyncReadLineWithEncoding: OF_STRING_ENCODING_ISO_8859_1
-					   target: self
-					 selector: @selector(socket:
-						       didReceiveISO88591Line:
-						       exception:)];
+		[socket
+		    asyncReadLineWithEncoding: _fallbackEncoding
+				       target: self
+				     selector: @selector(socket:
+						   didReceiveWronglyEncodedLine:
+						   exception:)];
 		return false;
 	}
 
