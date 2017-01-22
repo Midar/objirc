@@ -38,6 +38,7 @@
 #import "IRCUser.h"
 
 @implementation IRCConnection
+@synthesize socketClass = _socketClass;
 @synthesize server = _server, port = _port;
 @synthesize nickname = _nickname, username = _username, realname = _realname;
 @synthesize delegate = _delegate, socket = _socket;
@@ -52,6 +53,7 @@
 	self = [super init];
 
 	@try {
+		_socketClass = [OFTCPSocket class];
 		_channels = [[OFMutableDictionary alloc] init];
 		_port = 6667;
 	} @catch (id e) {
@@ -81,7 +83,12 @@
 	if (_socket != nil)
 		@throw [OFAlreadyConnectedException exception];
 
-	_socket = [[OFTCPSocket alloc] init];
+	_socket = [[_socketClass alloc] init];
+	if ([_delegate respondsToSelector:
+	    @selector(connection:didCreateSocket:)])
+		[_delegate connection: self
+		      didCreateSocket: _socket];
+
 	[_socket connectToHost: _server
 			  port: _port];
 

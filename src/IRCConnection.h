@@ -29,6 +29,8 @@
 @protocol IRCConnectionDelegate <OFObject>
 @optional
 - (void)connection: (IRCConnection*)connection
+   didCreateSocket: (OF_KINDOF(OFTCPSocket)*)socket;
+- (void)connection: (IRCConnection*)connection
     didReceiveLine: (OFString*)line;
 - (void)connection: (IRCConnection*)connection
        didSendLine: (OFString*)line;
@@ -72,7 +74,8 @@
 
 @interface IRCConnection: OFObject
 {
-	OFTCPSocket *_socket;
+	Class _socketClass;
+	OF_KINDOF(OFTCPSocket) *_socket;
 	OFString *_server;
 	uint16_t _port;
 	OFString *_nickname, *_username, *_realname;
@@ -80,6 +83,7 @@
 	id <IRCConnectionDelegate> _delegate;
 }
 
+@property (assign) Class socketClass;
 @property (copy) OFString *server;
 @property (assign) uint16_t port;
 @property (copy) OFString *nickname, *username, *realname;
