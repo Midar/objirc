@@ -138,4 +138,11 @@ OF_APPLICATION_DELEGATE(TestApp)
 	of_log(@"Users in %@: %@", channel,
 	    [connection usersInChannel: channel]);
 }
+
+- (void)connectionWasClosed: (IRCConnection*)connection
+{
+	of_log(@"Disconnected!");
+
+	[OFApplication terminate];
+}
 @end

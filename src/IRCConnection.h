@@ -82,6 +82,9 @@
 	OFMutableDictionary *_channels;
 	id <IRCConnectionDelegate> _delegate;
 	of_string_encoding_t _fallbackEncoding;
+	of_time_interval_t _pingInterval, _pingTimeout;
+	OFString *_pingData;
+	OFTimer *_pingTimer;
 }
 
 @property (assign) Class socketClass;
@@ -91,6 +94,7 @@
 @property (assign) id <IRCConnectionDelegate> delegate;
 @property (readonly, retain) OFTCPSocket *socket;
 @property of_string_encoding_t fallbackEncoding;
+@property of_time_interval_t pingInterval, pingTimeout;
 
 + (instancetype)connection;
 - (void)sendLine: (OFString*)line;

@@ -43,6 +43,7 @@
 @synthesize nickname = _nickname, username = _username, realname = _realname;
 @synthesize delegate = _delegate, socket = _socket;
 @synthesize fallbackEncoding = _fallbackEncoding;
+@synthesize pingInterval = _pingInterval, pingTimeout = _pingTimeout;
 
 + (instancetype)connection
 {
@@ -58,6 +59,8 @@
 		_channels = [[OFMutableDictionary alloc] init];
 		_port = 6667;
 		_fallbackEncoding = OF_STRING_ENCODING_ISO_8859_1;
+		_pingInterval = 120;
+		_pingTimeout = 30;
 	} @catch (id e) {
 		[self release];
 		@throw e;
@@ -74,6 +77,8 @@
 	[_username release];
 	[_realname release];
 	[_channels release];
+	[_pingData release];
+	[_pingTimer release];
 
 	[super dealloc];
 }
@@ -249,6 +254,19 @@
 		return;
 	}
 
+	/* PONG */
+	if ([components count] == 4 &&
+	    [[components objectAtIndex: 1] isEqual: @"PONG"] &&
+	    [[components objectAtIndex: 3] isEqual: _pingData]) {
+		[_pingTimer invalidate];
+
+		[_pingData release];
+		[_pingTimer release];
+
+		_pingData = nil;
+		_pingTimer = nil;
+	}
+
 	action = [[components objectAtIndex: 1] uppercaseString];
 
 	/* Connected */
@@ -256,6 +274,11 @@
 		if ([_delegate respondsToSelector:
 		    @selector(connectionWasEstablished:)])
 			[_delegate connectionWasEstablished: self];
+
+		[OFTimer scheduledTimerWithTimeInterval: _pingInterval
+						 target: self
+					       selector: @selector(IRC_sendPing)
+						repeats: true];
 
 		return;
 	}
@@ -527,6 +550,31 @@
 	}
 }
 
+- (void)IRC_sendPing
+{
+	[_pingData release];
+	[_pingTimer release];
+
+	_pingData = [[OFString alloc] initWithFormat: @":%d", rand()];
+	[_socket writeFormat: @"PING %@\r\n", _pingData];
+
+	_pingTimer = [[OFTimer
+	    scheduledTimerWithTimeInterval: _pingTimeout
+				    target: self
+				  selector: @selector(IRC_pingTimeout)
+				   repeats: false] retain];
+}
+
+- (void)IRC_pingTimeout
+{
+	if ([_delegate respondsToSelector: @selector(connectionWasClosed:)])
+		[_delegate connectionWasClosed: self];
+
+	[_socket cancelAsyncRequests];
+	[_socket release];
+	_socket = nil;
+}
+
 - (void)processLine: (OFString*)line
 {
 	void *pool = objc_autoreleasePoolPush();
@@ -570,11 +618,14 @@
 		return false;
 	}
 
-	if ([_delegate respondsToSelector: @selector(connectionWasClosed:)]) {
+	if ([_delegate respondsToSelector: @selector(connectionWasClosed:)])
 		[_delegate connectionWasClosed: self];
-		[_socket release];
-		_socket = nil;
-	}
+
+	[_pingTimer invalidate];
+
+	[_socket cancelAsyncRequests];
+	[_socket release];
+	_socket = nil;
 
 	return false;
 }
