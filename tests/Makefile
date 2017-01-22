@@ -5,8 +5,6 @@ SRCS = tests.m
 
 include ../buildsys.mk
 
-post-all: ${RUN_TESTS}
-
 .PHONY: run
 run:
 	rm -f libobjirc.so.${OBJIRC_LIB_MAJOR}

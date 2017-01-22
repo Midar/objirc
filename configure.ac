@@ -48,9 +48,5 @@ dnl and add OBJCPPFLAGS to CPPFLAGS, thus we need to AC_SUBST these ourself.
 AC_SUBST(CPP)
 AC_SUBST(CPPFLAGS)
 
-AS_IF([test x"$cross_compiling" != x"yes"], [
-	AC_SUBST(RUN_TESTS, "run")
-])
-
 AC_CONFIG_FILES([buildsys.mk extra.mk])
 AC_OUTPUT
