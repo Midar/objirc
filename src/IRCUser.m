@@ -36,12 +36,12 @@
 @implementation IRCUser
 @synthesize username = _username, nickname = _nickname, hostname = _hostname;
 
-+ (instancetype)IRCUserWithString: (OFString*)string
++ (instancetype)IRCUserWithString: (OFString *)string
 {
 	return [[[self alloc] initWithString: string] autorelease];
 }
 
-- initWithString: (OFString*)string
+- initWithString: (OFString *)string
 {
 	char *tmp2 = NULL;
 
@@ -93,7 +93,7 @@
 	return [self retain];
 }
 
-- (OFString*)description
+- (OFString *)description
 {
 	return [OFString stringWithFormat: @"%@!%@@%@",
 					   _nickname, _username, _hostname];

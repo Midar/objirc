@@ -110,7 +110,7 @@
 	[self disconnectWithReason: nil];
 }
 
-- (void)disconnectWithReason: (OFString*)reason
+- (void)disconnectWithReason: (OFString *)reason
 {
 	void *pool = objc_autoreleasePoolPush();
 
@@ -124,7 +124,7 @@
 	objc_autoreleasePoolPop(pool);
 }
 
-- (void)joinChannel: (OFString*)channel
+- (void)joinChannel: (OFString *)channel
 {
 	void *pool = objc_autoreleasePoolPush();
 
@@ -135,14 +135,14 @@
 	objc_autoreleasePoolPop(pool);
 }
 
-- (void)leaveChannel: (OFString*)channel
+- (void)leaveChannel: (OFString *)channel
 {
 	[self leaveChannel: channel
 		    reason: nil];
 }
 
-- (void)leaveChannel: (OFString*)channel
-	      reason: (OFString*)reason
+- (void)leaveChannel: (OFString *)channel
+	      reason: (OFString *)reason
 {
 	void *pool = objc_autoreleasePoolPush();
 
@@ -159,7 +159,7 @@
 	objc_autoreleasePoolPop(pool);
 }
 
-- (void)sendLine: (OFString*)line
+- (void)sendLine: (OFString *)line
 {
 	if ([_delegate respondsToSelector: @selector(connection:didSendLine:)])
 		[_delegate connection: self
@@ -168,7 +168,7 @@
 	[_socket writeLine: line];
 }
 
-- (void)sendLineWithFormat: (OFConstantString*)format, ...
+- (void)sendLineWithFormat: (OFConstantString *)format, ...
 {
 	void *pool = objc_autoreleasePoolPush();
 	OFString *line;
@@ -184,8 +184,8 @@
 	objc_autoreleasePoolPop(pool);
 }
 
-- (void)sendMessage: (OFString*)msg
-		 to: (OFString*)to
+- (void)sendMessage: (OFString *)msg
+		 to: (OFString *)to
 {
 	void *pool = objc_autoreleasePoolPush();
 
@@ -195,8 +195,8 @@
 	objc_autoreleasePoolPop(pool);
 }
 
-- (void)sendNotice: (OFString*)notice
-		to: (OFString*)to
+- (void)sendNotice: (OFString *)notice
+		to: (OFString *)to
 {
 	void *pool = objc_autoreleasePoolPush();
 
@@ -206,9 +206,9 @@
 	objc_autoreleasePoolPop(pool);
 }
 
-- (void)kickUser: (OFString*)user
-	 channel: (OFString*)channel
-	  reason: (OFString*)reason
+- (void)kickUser: (OFString *)user
+	 channel: (OFString *)channel
+	  reason: (OFString *)reason
 {
 	void *pool = objc_autoreleasePoolPush();
 
@@ -219,7 +219,7 @@
 	objc_autoreleasePoolPop(pool);
 }
 
-- (void)changeNicknameTo: (OFString*)nickname
+- (void)changeNicknameTo: (OFString *)nickname
 {
 	void *pool = objc_autoreleasePoolPush();
 
@@ -231,7 +231,7 @@
 	objc_autoreleasePoolPop(pool);
 }
 
-- (void)IRC_processLine: (OFString*)line
+- (void)IRC_processLine: (OFString *)line
 {
 	OFArray *components;
 	OFString *action = nil;
@@ -575,7 +575,7 @@
 	_socket = nil;
 }
 
-- (void)processLine: (OFString*)line
+- (void)processLine: (OFString *)line
 {
 	void *pool = objc_autoreleasePoolPush();
 
@@ -584,9 +584,9 @@
 	objc_autoreleasePoolPop(pool);
 }
 
--		  (bool)socket: (OFTCPSocket*)socket
-  didReceiveWronglyEncodedLine: (OFString*)line
-		     exception: (OFException*)exception
+-		  (bool)socket: (OFTCPSocket *)socket
+  didReceiveWronglyEncodedLine: (OFString *)line
+		     exception: (OFException *)exception
 {
 	if (line != nil) {
 		[self IRC_processLine: line];
@@ -599,9 +599,9 @@
 	return false;
 }
 
--   (bool)socket: (OFTCPSocket*)socket
-  didReceiveLine: (OFString*)line
-       exception: (OFException*)exception
+-   (bool)socket: (OFTCPSocket *)socket
+  didReceiveLine: (OFString *)line
+       exception: (OFException *)exception
 {
 	if (line != nil) {
 		[self IRC_processLine: line];
@@ -623,7 +623,8 @@
 
 	[_pingTimer invalidate];
 
-	[_socket cancelAsyncRequests];
+	[_socket performSelector: @selector(cancelAsyncRequests)
+		      afterDelay: 0];
 	[_socket release];
 	_socket = nil;
 
@@ -637,7 +638,7 @@
 					      exception:)];
 }
 
-- (OFSet*)usersInChannel: (OFString*)channel
+- (OFSet OF_GENERIC(OFString *) *)usersInChannel: (OFString *)channel
 {
 	return [[[_channels objectForKey: channel] copy] autorelease];
 }

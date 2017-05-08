@@ -28,48 +28,48 @@
 
 @protocol IRCConnectionDelegate <OFObject>
 @optional
-- (void)connection: (IRCConnection*)connection
-   didCreateSocket: (OF_KINDOF(OFTCPSocket)*)socket;
-- (void)connection: (IRCConnection*)connection
-    didReceiveLine: (OFString*)line;
-- (void)connection: (IRCConnection*)connection
-       didSendLine: (OFString*)line;
-- (void)connectionWasEstablished: (IRCConnection*)connection;
-- (void)connection: (IRCConnection*)connection
-	didSeeUser: (IRCUser*)user
-       joinChannel: (OFString*)channel;
-- (void)connection: (IRCConnection*)connection
-	didSeeUser: (IRCUser*)user
-      leaveChannel: (OFString*)channel
-	    reason: (OFString*)reason;
-- (void)connection: (IRCConnection*)connection
-        didSeeUser: (IRCUser*)user
-  changeNicknameTo: (OFString*)nickname;
-- (void)connection: (IRCConnection*)connection
-	didSeeUser: (IRCUser*)user
-	  kickUser: (OFString*)kickedUser
-	   channel: (OFString*)channel
-	    reason: (OFString*)reason;
-- (void)connection: (IRCConnection*)connection
-    didSeeUserQuit: (IRCUser*)user
-	    reason: (OFString*)reason;
--  (void)connection: (IRCConnection*)connection
-  didReceiveMessage: (OFString*)msg
-	    channel: (OFString*)channel
-	       user: (IRCUser*)user;
--	  (void)connection: (IRCConnection*)connection
-  didReceivePrivateMessage: (OFString*)msg
-		      user: (IRCUser*)user;
-- (void)connection: (IRCConnection*)connection
-  didReceiveNotice: (OFString*)notice
-	      user: (IRCUser*)user;
-- (void)connection: (IRCConnection*)connection
-  didReceiveNotice: (OFString*)notice
-	   channel: (OFString*)channel
-	      user: (IRCUser*)user;
--	   (void)connection: (IRCConnection*)connection
-  didReceiveNamesForChannel: (OFString*)channel;
-- (void)connectionWasClosed: (IRCConnection*)connection;
+- (void)connection: (IRCConnection *)connection
+   didCreateSocket: (OF_KINDOF(OFTCPSocket) *)socket;
+- (void)connection: (IRCConnection *)connection
+    didReceiveLine: (OFString *)line;
+- (void)connection: (IRCConnection *)connection
+       didSendLine: (OFString *)line;
+- (void)connectionWasEstablished: (IRCConnection *)connection;
+- (void)connection: (IRCConnection *)connection
+	didSeeUser: (IRCUser *)user
+       joinChannel: (OFString *)channel;
+- (void)connection: (IRCConnection *)connection
+	didSeeUser: (IRCUser *)user
+      leaveChannel: (OFString *)channel
+	    reason: (OFString *)reason;
+- (void)connection: (IRCConnection *)connection
+        didSeeUser: (IRCUser *)user
+  changeNicknameTo: (OFString *)nickname;
+- (void)connection: (IRCConnection *)connection
+	didSeeUser: (IRCUser *)user
+	  kickUser: (OFString *)kickedUser
+	   channel: (OFString *)channel
+	    reason: (OFString *)reason;
+- (void)connection: (IRCConnection *)connection
+    didSeeUserQuit: (IRCUser *)user
+	    reason: (OFString *)reason;
+-  (void)connection: (IRCConnection *)connection
+  didReceiveMessage: (OFString *)msg
+	    channel: (OFString *)channel
+	       user: (IRCUser *)user;
+-	  (void)connection: (IRCConnection *)connection
+  didReceivePrivateMessage: (OFString *)msg
+		      user: (IRCUser *)user;
+- (void)connection: (IRCConnection *)connection
+  didReceiveNotice: (OFString *)notice
+	      user: (IRCUser *)user;
+- (void)connection: (IRCConnection *)connection
+  didReceiveNotice: (OFString *)notice
+	   channel: (OFString *)channel
+	      user: (IRCUser *)user;
+-	   (void)connection: (IRCConnection *)connection
+  didReceiveNamesForChannel: (OFString *)channel;
+- (void)connectionWasClosed: (IRCConnection *)connection;
 @end
 
 @interface IRCConnection: OFObject
@@ -79,7 +79,7 @@
 	OFString *_server;
 	uint16_t _port;
 	OFString *_nickname, *_username, *_realname;
-	OFMutableDictionary *_channels;
+	OFMutableDictionary OF_GENERIC(OFString *, OFMutableSet *) *_channels;
 	id <IRCConnectionDelegate> _delegate;
 	of_string_encoding_t _fallbackEncoding;
 	of_time_interval_t _pingInterval, _pingTimeout;
@@ -88,33 +88,33 @@
 }
 
 @property (assign) Class socketClass;
-@property (copy) OFString *server;
+@property (nonatomic, copy) OFString *server;
 @property uint16_t port;
-@property (copy) OFString *nickname, *username, *realname;
+@property (nonatomic, copy) OFString *nickname, *username, *realname;
 @property (assign) id <IRCConnectionDelegate> delegate;
-@property (readonly, retain) OFTCPSocket *socket;
+@property (readonly, nonatomic) OFTCPSocket *socket;
 @property of_string_encoding_t fallbackEncoding;
 @property of_time_interval_t pingInterval, pingTimeout;
 
 + (instancetype)connection;
-- (void)sendLine: (OFString*)line;
-- (void)sendLineWithFormat: (OFConstantString*)line, ...;
+- (void)sendLine: (OFString *)line;
+- (void)sendLineWithFormat: (OFConstantString *)line, ...;
 - (void)connect;
 - (void)disconnect;
-- (void)disconnectWithReason: (OFString*)reason;
-- (void)joinChannel: (OFString*)channelName;
-- (void)leaveChannel: (OFString*)channel;
-- (void)leaveChannel: (OFString*)channel
-	      reason: (OFString*)reason;
-- (void)sendMessage: (OFString*)msg
-		 to: (OFString*)to;
-- (void)sendNotice: (OFString*)notice
-		to: (OFString*)to;
-- (void)kickUser: (OFString*)user
-	 channel: (OFString*)channel
-	  reason: (OFString*)reason;
-- (void)changeNicknameTo: (OFString*)nickname;
-- (void)processLine: (OFString*)line;
+- (void)disconnectWithReason: (OFString *)reason;
+- (void)joinChannel: (OFString *)channelName;
+- (void)leaveChannel: (OFString *)channel;
+- (void)leaveChannel: (OFString *)channel
+	      reason: (OFString *)reason;
+- (void)sendMessage: (OFString *)msg
+		 to: (OFString *)to;
+- (void)sendNotice: (OFString *)notice
+		to: (OFString *)to;
+- (void)kickUser: (OFString *)user
+	 channel: (OFString *)channel
+	  reason: (OFString *)reason;
+- (void)changeNicknameTo: (OFString *)nickname;
+- (void)processLine: (OFString *)line;
 - (void)handleConnection;
-- (OFSet*)usersInChannel: (OFString*)channel;
+- (OFSet OF_GENERIC(OFString *) *)usersInChannel: (OFString *)channel;
 @end

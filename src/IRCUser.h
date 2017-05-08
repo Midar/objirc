@@ -28,8 +28,8 @@
 	OFString *_nickname, *_username, *_hostname;
 }
 
-@property (copy, readonly) OFString *nickname, *username, *hostname;
+@property (readonly, nonatomic) OFString *nickname, *username, *hostname;
 
-+ (instancetype)IRCUserWithString: (OFString*)string;
-- initWithString: (OFString*)string;
++ (instancetype)IRCUserWithString: (OFString *)string;
+- initWithString: (OFString *)string;
 @end
