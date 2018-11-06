@@ -31,7 +31,7 @@ OF_ASSUME_NONNULL_BEGIN
 @protocol IRCConnectionDelegate <OFObject>
 @optional
 - (void)connection: (IRCConnection *)connection
-   didCreateSocket: (OF_KINDOF(OFTCPSocket) *)socket;
+   didCreateSocket: (OF_KINDOF(OFTCPSocket *))socket;
 - (void)connection: (IRCConnection *)connection
     didReceiveLine: (OFString *)line;
 - (void)connection: (IRCConnection *)connection
@@ -77,7 +77,7 @@ OF_ASSUME_NONNULL_BEGIN
 @interface IRCConnection: OFObject
 {
 	Class _socketClass;
-	OF_KINDOF(OFTCPSocket) *_Nullable _socket;
+	OF_KINDOF(OFTCPSocket *) _Nullable _socket;
 	OFString *_Nullable _server;
 	uint16_t _port;
 	OFString *_Nullable _nickname, *_Nullable _username;
