@@ -2,7 +2,7 @@ AC_INIT(ObjIRC, 0.1, js@heap.zone)
 BUILDSYS_INIT
 
 AC_CONFIG_SRCDIR(src)
-AC_CONFIG_MACRO_DIR(m4)
+AC_CONFIG_MACRO_DIR(build-aux/m4)
 AC_CONFIG_AUX_DIR(build-aux)
 
 AC_CHECK_TOOL(OBJFW_CONFIG, objfw-config)
