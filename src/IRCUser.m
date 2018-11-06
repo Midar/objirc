@@ -41,7 +41,7 @@
 	return [[[self alloc] initWithString: string] autorelease];
 }
 
-- initWithString: (OFString *)string
+- (instancetype)initWithString: (OFString *)string
 {
 	char *tmp2 = NULL;
 
@@ -88,7 +88,7 @@
 	[super dealloc];
 }
 
-- copy
+- (id)copy
 {
 	return [self retain];
 }

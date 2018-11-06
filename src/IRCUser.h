@@ -23,6 +23,8 @@
 
 #import <ObjFW/OFObject.h>
 
+OF_ASSUME_NONNULL_BEGIN
+
 @interface IRCUser: OFObject <OFCopying>
 {
 	OFString *_nickname, *_username, *_hostname;
@@ -31,5 +33,7 @@
 @property (readonly, nonatomic) OFString *nickname, *username, *hostname;
 
 + (instancetype)IRCUserWithString: (OFString *)string;
-- initWithString: (OFString *)string;
+- (instancetype)initWithString: (OFString *)string OF_DESIGNATED_INITIALIZER;
 @end
+
+OF_ASSUME_NONNULL_END

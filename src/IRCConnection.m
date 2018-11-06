@@ -184,12 +184,12 @@
 	objc_autoreleasePoolPop(pool);
 }
 
-- (void)sendMessage: (OFString *)msg
+- (void)sendMessage: (OFString *)message
 		 to: (OFString *)to
 {
 	void *pool = objc_autoreleasePoolPush();
 
-	for (OFString *line in [msg componentsSeparatedByString: @"\n"])
+	for (OFString *line in [message componentsSeparatedByString: @"\n"])
 		[self sendLineWithFormat: @"PRIVMSG %@ :%@", to, line];
 
 	objc_autoreleasePoolPop(pool);
@@ -482,13 +482,13 @@
 		OFString *from = [components objectAtIndex: 0];
 		OFString *to = [components objectAtIndex: 2];
 		IRCUser *user;
-		OFString *msg;
+		OFString *message;
 		size_t pos = [from length] + 1 +
 		    [[components objectAtIndex: 1] length] + 1 + [to length];
 
 		from = [from substringWithRange:
 		    of_range(1, [from length] - 1)];
-		msg = [line substringWithRange:
+		message = [line substringWithRange:
 		    of_range(pos + 2, [line length] - pos - 2)];
 		user = [IRCUser IRCUserWithString: from];
 
@@ -496,14 +496,14 @@
 			if ([_delegate respondsToSelector: @selector(connection:
 			    didReceiveMessage:channel:user:)])
 				[_delegate connection: self
-				    didReceiveMessage: msg
+				    didReceiveMessage: message
 					      channel: to
 						 user: user];
 		} else {
 			if ([_delegate respondsToSelector: @selector(connection:
 			    didReceivePrivateMessage:user:)])
 				[_delegate	  connection: self
-				    didReceivePrivateMessage: msg
+				    didReceivePrivateMessage: message
 							user: user];
 		}
 
@@ -593,7 +593,8 @@
 		[socket asyncReadLineWithTarget: self
 				       selector: @selector(socket:
 						     didReceiveLine:
-						     exception:)];
+						     exception:)
+					context: nil];
 	}
 
 	return false;
@@ -614,7 +615,8 @@
 				       target: self
 				     selector: @selector(socket:
 						   didReceiveWronglyEncodedLine:
-						   exception:)];
+						   exception:)
+				      context: nil];
 		return false;
 	}
 
@@ -635,7 +637,8 @@
 {
 	[_socket asyncReadLineWithTarget: self
 				selector: @selector(socket:didReceiveLine:
-					      exception:)];
+					      exception:)
+				 context: nil];
 }
 
 - (OFSet OF_GENERIC(OFString *) *)usersInChannel: (OFString *)channel

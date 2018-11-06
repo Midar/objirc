@@ -23,6 +23,8 @@
 
 #import <ObjFW/ObjFW.h>
 
+OF_ASSUME_NONNULL_BEGIN
+
 @class IRCConnection;
 @class IRCUser;
 
@@ -41,7 +43,7 @@
 - (void)connection: (IRCConnection *)connection
 	didSeeUser: (IRCUser *)user
       leaveChannel: (OFString *)channel
-	    reason: (OFString *)reason;
+	    reason: (nullable OFString *)reason;
 - (void)connection: (IRCConnection *)connection
         didSeeUser: (IRCUser *)user
   changeNicknameTo: (OFString *)nickname;
@@ -49,10 +51,10 @@
 	didSeeUser: (IRCUser *)user
 	  kickUser: (OFString *)kickedUser
 	   channel: (OFString *)channel
-	    reason: (OFString *)reason;
+	    reason: (nullable OFString *)reason;
 - (void)connection: (IRCConnection *)connection
     didSeeUserQuit: (IRCUser *)user
-	    reason: (OFString *)reason;
+	    reason: (nullable OFString *)reason;
 -  (void)connection: (IRCConnection *)connection
   didReceiveMessage: (OFString *)msg
 	    channel: (OFString *)channel
@@ -75,46 +77,52 @@
 @interface IRCConnection: OFObject
 {
 	Class _socketClass;
-	OF_KINDOF(OFTCPSocket) *_socket;
-	OFString *_server;
+	OF_KINDOF(OFTCPSocket) *_Nullable _socket;
+	OFString *_Nullable _server;
 	uint16_t _port;
-	OFString *_nickname, *_username, *_realname;
+	OFString *_Nullable _nickname, *_Nullable _username;
+	OFString *_Nullable _realname;
 	OFMutableDictionary OF_GENERIC(OFString *, OFMutableSet *) *_channels;
-	id <IRCConnectionDelegate> _delegate;
+	id <IRCConnectionDelegate> _Nullable _delegate;
 	of_string_encoding_t _fallbackEncoding;
 	of_time_interval_t _pingInterval, _pingTimeout;
-	OFString *_pingData;
-	OFTimer *_pingTimer;
+	OFString *_Nullable _pingData;
+	OFTimer *_Nullable _pingTimer;
 }
 
-@property (assign) Class socketClass;
-@property (nonatomic, copy) OFString *server;
-@property uint16_t port;
-@property (nonatomic, copy) OFString *nickname, *username, *realname;
-@property (assign) id <IRCConnectionDelegate> delegate;
-@property (readonly, nonatomic) OFTCPSocket *socket;
-@property of_string_encoding_t fallbackEncoding;
-@property of_time_interval_t pingInterval, pingTimeout;
+@property (readonly, nonatomic) Class socketClass;
+@property OF_NULLABLE_PROPERTY (copy, nonatomic) OFString *server;
+@property (nonatomic) uint16_t port;
+@property OF_NULLABLE_PROPERTY (copy, nonatomic)
+    OFString *nickname, *username, *realname;
+@property OF_NULLABLE_PROPERTY (assign, nonatomic)
+    id <IRCConnectionDelegate> delegate;
+@property OF_NULLABLE_PROPERTY (readonly, nonatomic)
+    OF_KINDOF(OFTCPSocket *) socket;
+@property (nonatomic) of_string_encoding_t fallbackEncoding;
+@property (nonatomic) of_time_interval_t pingInterval, pingTimeout;
 
 + (instancetype)connection;
 - (void)sendLine: (OFString *)line;
 - (void)sendLineWithFormat: (OFConstantString *)line, ...;
 - (void)connect;
 - (void)disconnect;
-- (void)disconnectWithReason: (OFString *)reason;
+- (void)disconnectWithReason: (nullable OFString *)reason;
 - (void)joinChannel: (OFString *)channelName;
 - (void)leaveChannel: (OFString *)channel;
 - (void)leaveChannel: (OFString *)channel
-	      reason: (OFString *)reason;
-- (void)sendMessage: (OFString *)msg
+	      reason: (nullable OFString *)reason;
+- (void)sendMessage: (OFString *)message
 		 to: (OFString *)to;
 - (void)sendNotice: (OFString *)notice
 		to: (OFString *)to;
 - (void)kickUser: (OFString *)user
 	 channel: (OFString *)channel
-	  reason: (OFString *)reason;
+	  reason: (nullable OFString *)reason;
 - (void)changeNicknameTo: (OFString *)nickname;
 - (void)processLine: (OFString *)line;
 - (void)handleConnection;
-- (OFSet OF_GENERIC(OFString *) *)usersInChannel: (OFString *)channel;
+- (nullable OFSet OF_GENERIC(OFString *) *)usersInChannel: (OFString *)channel;
 @end
+
+OF_ASSUME_NONNULL_END
