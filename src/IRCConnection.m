@@ -50,7 +50,7 @@
 	return [[[self alloc] init] autorelease];
 }
 
-- init
+- (instancetype)init
 {
 	self = [super init];
 
@@ -231,7 +231,7 @@
 	objc_autoreleasePoolPop(pool);
 }
 
-- (void)IRC_processLine: (OFString *)line
+- (void)irc_processLine: (OFString *)line
 {
 	OFArray *components;
 	OFString *action = nil;
@@ -277,7 +277,7 @@
 
 		[OFTimer scheduledTimerWithTimeInterval: _pingInterval
 						 target: self
-					       selector: @selector(IRC_sendPing)
+					       selector: @selector(irc_sendPing)
 						repeats: true];
 
 		return;
@@ -550,7 +550,7 @@
 	}
 }
 
-- (void)IRC_sendPing
+- (void)irc_sendPing
 {
 	[_pingData release];
 	[_pingTimer release];
@@ -561,11 +561,11 @@
 	_pingTimer = [[OFTimer
 	    scheduledTimerWithTimeInterval: _pingTimeout
 				    target: self
-				  selector: @selector(IRC_pingTimeout)
+				  selector: @selector(irc_pingTimeout)
 				   repeats: false] retain];
 }
 
-- (void)IRC_pingTimeout
+- (void)irc_pingTimeout
 {
 	if ([_delegate respondsToSelector: @selector(connectionWasClosed:)])
 		[_delegate connectionWasClosed: self];
@@ -579,20 +579,21 @@
 {
 	void *pool = objc_autoreleasePoolPush();
 
-	[self IRC_processLine: line];
+	[self irc_processLine: line];
 
 	objc_autoreleasePoolPop(pool);
 }
 
--		  (bool)socket: (OFTCPSocket *)socket
+-	      (bool)irc_socket: (OFTCPSocket *)socket
   didReceiveWronglyEncodedLine: (OFString *)line
+		       context: (id)context
 		     exception: (OFException *)exception
 {
 	if (line != nil) {
-		[self IRC_processLine: line];
+		[self irc_processLine: line];
 		[socket asyncReadLineWithTarget: self
-				       selector: @selector(socket:
-						     didReceiveLine:
+				       selector: @selector(irc_socket:
+						     didReceiveLine:context:
 						     exception:)
 					context: nil];
 	}
@@ -600,12 +601,13 @@
 	return false;
 }
 
--   (bool)socket: (OFTCPSocket *)socket
-  didReceiveLine: (OFString *)line
-       exception: (OFException *)exception
+- (bool)irc_socket: (OFTCPSocket *)socket
+    didReceiveLine: (OFString *)line
+	   context: (id)context
+	 exception: (OFException *)exception
 {
 	if (line != nil) {
-		[self IRC_processLine: line];
+		[self irc_processLine: line];
 		return true;
 	}
 
@@ -613,9 +615,9 @@
 		[socket
 		    asyncReadLineWithEncoding: _fallbackEncoding
 				       target: self
-				     selector: @selector(socket:
+				     selector: @selector(irc_socket:
 						   didReceiveWronglyEncodedLine:
-						   exception:)
+						   context:exception:)
 				      context: nil];
 		return false;
 	}
@@ -636,8 +638,8 @@
 - (void)handleConnection
 {
 	[_socket asyncReadLineWithTarget: self
-				selector: @selector(socket:didReceiveLine:
-					      exception:)
+				selector: @selector(irc_socket:didReceiveLine:
+					      context:exception:)
 				 context: nil];
 }
 
