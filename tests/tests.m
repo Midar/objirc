@@ -44,7 +44,6 @@ OF_APPLICATION_DELEGATE(TestApp)
 	[connection setDelegate: self];
 
 	[connection connect];
-	[connection handleConnection];
 }
 
 - (void)connection: (IRCConnection*)connection
@@ -62,6 +61,14 @@ OF_APPLICATION_DELEGATE(TestApp)
 - (void)connectionWasEstablished: (IRCConnection*)connection
 {
 	[connection joinChannel: @"#objfw"];
+}
+
+-	       (void)connection: (IRCConnection *)connection
+  didFailToConnectWithException: (id)exception
+{
+	[of_stderr writeFormat: @"Failed to connect: %@\n", exception];
+
+	[OFApplication terminateWithStatus: 1];
 }
 
 - (void)connection: (IRCConnection*)connection

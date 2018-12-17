@@ -37,6 +37,8 @@ OF_ASSUME_NONNULL_BEGIN
 - (void)connection: (IRCConnection *)connection
        didSendLine: (OFString *)line;
 - (void)connectionWasEstablished: (IRCConnection *)connection;
+-	       (void)connection: (IRCConnection *)connection
+  didFailToConnectWithException: (id)exception;
 - (void)connection: (IRCConnection *)connection
 	didSeeUser: (IRCUser *)user
        joinChannel: (OFString *)channel;
@@ -88,6 +90,7 @@ OF_ASSUME_NONNULL_BEGIN
 	of_time_interval_t _pingInterval, _pingTimeout;
 	OFString *_Nullable _pingData;
 	OFTimer *_Nullable _pingTimer;
+	bool _fallbackEncodingUsed;
 }
 
 @property (readonly, nonatomic) Class socketClass;
@@ -120,8 +123,6 @@ OF_ASSUME_NONNULL_BEGIN
 	 channel: (OFString *)channel
 	  reason: (nullable OFString *)reason;
 - (void)changeNicknameTo: (OFString *)nickname;
-- (void)processLine: (OFString *)line;
-- (void)handleConnection;
 - (nullable OFSet OF_GENERIC(OFString *) *)usersInChannel: (OFString *)channel;
 @end
 

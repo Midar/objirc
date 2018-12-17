@@ -37,6 +37,9 @@
 #import "IRCConnection.h"
 #import "IRCUser.h"
 
+@interface IRCConnection () <OFTCPSocketDelegate>
+@end
+
 @implementation IRCConnection
 @synthesize socketClass = _socketClass;
 @synthesize server = _server, port = _port;
@@ -91,18 +94,36 @@
 		@throw [OFAlreadyConnectedException exception];
 
 	_socket = [[_socketClass alloc] init];
+	[_socket setDelegate: self];
+	[_socket asyncConnectToHost: _server
+			       port: _port];
+
+	objc_autoreleasePoolPop(pool);
+}
+
+-     (void)socket: (OF_KINDOF(OFTCPSocket *))socket
+  didConnectToHost: (OFString *)host
+	      port: (uint16_t)port
+	 exception: (id)exception
+{
+	if (exception != nil) {
+		if ([_delegate respondsToSelector:
+		    @selector(connection:didFailToConnectWithException:)])
+			[_delegate	       connection: self
+			    didFailToConnectWithException: exception];
+
+		return;
+	}
+
 	if ([_delegate respondsToSelector:
 	    @selector(connection:didCreateSocket:)])
 		[_delegate connection: self
 		      didCreateSocket: _socket];
 
-	[_socket connectToHost: _server
-			  port: _port];
-
 	[self sendLineWithFormat: @"NICK %@", _nickname];
 	[self sendLineWithFormat: @"USER %@ * 0 :%@", _username, _realname];
 
-	objc_autoreleasePoolPop(pool);
+	[socket asyncReadLine];
 }
 
 - (void)disconnect
@@ -575,50 +596,25 @@
 	_socket = nil;
 }
 
-- (void)processLine: (OFString *)line
-{
-	void *pool = objc_autoreleasePoolPush();
-
-	[self irc_processLine: line];
-
-	objc_autoreleasePoolPop(pool);
-}
-
--	      (bool)irc_socket: (OFTCPSocket *)socket
-  didReceiveWronglyEncodedLine: (OFString *)line
-		       context: (id)context
-		     exception: (OFException *)exception
+- (bool)stream: (OF_KINDOF(OFStream *))stream
+   didReadLine: (OFString *)line
+     exception: (OFException *)exception
 {
 	if (line != nil) {
 		[self irc_processLine: line];
-		[socket asyncReadLineWithTarget: self
-				       selector: @selector(irc_socket:
-						     didReceiveLine:context:
-						     exception:)
-					context: nil];
-	}
 
-	return false;
-}
+		if (_fallbackEncodingUsed) {
+			_fallbackEncodingUsed = false;
+			[stream asyncReadLine];
+			return false;
+		}
 
-- (bool)irc_socket: (OFTCPSocket *)socket
-    didReceiveLine: (OFString *)line
-	   context: (id)context
-	 exception: (OFException *)exception
-{
-	if (line != nil) {
-		[self irc_processLine: line];
 		return true;
 	}
 
 	if ([exception isKindOfClass: [OFInvalidEncodingException class]]) {
-		[socket
-		    asyncReadLineWithEncoding: _fallbackEncoding
-				       target: self
-				     selector: @selector(irc_socket:
-						   didReceiveWronglyEncodedLine:
-						   context:exception:)
-				      context: nil];
+		_fallbackEncodingUsed = true;
+		[stream asyncReadLineWithEncoding: _fallbackEncoding];
 		return false;
 	}
 
@@ -633,14 +629,6 @@
 	_socket = nil;
 
 	return false;
-}
-
-- (void)handleConnection
-{
-	[_socket asyncReadLineWithTarget: self
-				selector: @selector(irc_socket:didReceiveLine:
-					      context:exception:)
-				 context: nil];
 }
 
 - (OFSet OF_GENERIC(OFString *) *)usersInChannel: (OFString *)channel
