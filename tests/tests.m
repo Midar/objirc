@@ -37,25 +37,23 @@ OF_APPLICATION_DELEGATE(TestApp)
 {
 	IRCConnection *connection = [[IRCConnection alloc] init];
 
-	[connection setServer: @"irc.freenode.net"];
-	[connection setNickname: @"ObjIRC"];
-	[connection setUsername: @"ObjIRC"];
-	[connection setRealname: @"ObjIRC"];
-	[connection setDelegate: self];
+	connection.server = @"irc.freenode.net";
+	connection.nickname = @"ObjIRC";
+	connection.username = @"ObjIRC";
+	connection.realname = @"ObjIRC";
+	connection.delegate = self;
 
 	[connection connect];
 }
 
-- (void)connection: (IRCConnection*)connection
-    didReceiveLine: (OFString*)line
+- (void)connection: (IRCConnection*)connection didReceiveLine: (OFString*)line
 {
-	[of_stderr writeFormat: @"> %@\n", line];
+	[OFStdErr writeFormat: @"> %@\n", line];
 }
 
-- (void)connection: (IRCConnection*)connection
-       didSendLine: (OFString*)line
+- (void)connection: (IRCConnection*)connection didSendLine: (OFString*)line
 {
-	[of_stderr writeFormat: @"< %@\n", line];
+	[OFStdErr writeFormat: @"< %@\n", line];
 }
 
 - (void)connectionWasEstablished: (IRCConnection*)connection
@@ -66,7 +64,7 @@ OF_APPLICATION_DELEGATE(TestApp)
 -	       (void)connection: (IRCConnection *)connection
   didFailToConnectWithException: (id)exception
 {
-	[of_stderr writeFormat: @"Failed to connect: %@\n", exception];
+	[OFStdErr writeFormat: @"Failed to connect: %@\n", exception];
 
 	[OFApplication terminateWithStatus: 1];
 }
@@ -75,7 +73,7 @@ OF_APPLICATION_DELEGATE(TestApp)
 	didSeeUser: (IRCUser*)user
        joinChannel: (OFString*)channel
 {
-	of_log(@"%@ joined %@.", user, channel);
+	OFLog(@"%@ joined %@.", user, channel);
 }
 
 - (void)connection: (IRCConnection*)connection
@@ -83,7 +81,7 @@ OF_APPLICATION_DELEGATE(TestApp)
       leaveChannel: (OFString*)channel
 	    reason: (OFString*)reason
 {
-	of_log(@"%@ left %@ (%@).", user, channel, reason);
+	OFLog(@"%@ left %@ (%@).", user, channel, reason);
 }
 
 -    (void)connection: (IRCConnection*)connection
@@ -92,21 +90,21 @@ OF_APPLICATION_DELEGATE(TestApp)
 	      channel: (OFString*)channel
 	       reason: (OFString*)reason
 {
-	of_log(@"%@ kicked %@ from %@: %@", user, kickedUser, channel, reason);
+	OFLog(@"%@ kicked %@ from %@: %@", user, kickedUser, channel, reason);
 }
 
 - (void)connection: (IRCConnection*)connection
     didSeeUserQuit: (IRCUser*)user
 	    reason: (OFString*)reason
 {
-	of_log(@"%@ quit (%@).", user, reason);
+	OFLog(@"%@ quit (%@).", user, reason);
 }
 
 - (void)connection: (IRCConnection*)connection
 	didSeeUser: (IRCUser*)user
   changeNicknameTo: (OFString *)nickname
 {
-	of_log(@"%@ changed nick to %@.", user, nickname);
+	OFLog(@"%@ changed nick to %@.", user, nickname);
 }
 
 -  (void)connection: (IRCConnection*)connection
@@ -114,14 +112,14 @@ OF_APPLICATION_DELEGATE(TestApp)
 	    channel: (OFString*)channel
 	       user: (IRCUser*)user
 {
-	of_log(@"[%@] %@: %@", channel, [user nickname], msg);
+	OFLog(@"[%@] %@: %@", channel, [user nickname], msg);
 }
 
 -	  (void)connection: (IRCConnection*)connection
   didReceivePrivateMessage: (OFString*)msg
 		      user: (IRCUser*)user
 {
-	of_log(@"(%@): %@", user, msg);
+	OFLog(@"(%@): %@", user, msg);
 }
 
 - (void)connection: (IRCConnection*)connection
@@ -129,26 +127,26 @@ OF_APPLICATION_DELEGATE(TestApp)
 	   channel: (OFString*)channel
 	      user: (IRCUser*)user
 {
-	of_log(@"NOTICE: [%@] %@: %@", channel, [user nickname], notice);
+	OFLog(@"NOTICE: [%@] %@: %@", channel, [user nickname], notice);
 }
 
 - (void)connection: (IRCConnection*)connection
   didReceiveNotice: (OFString*)notice
 	      user: (IRCUser*)user
 {
-	of_log(@"NOTICE: (%@): %@", user, notice);
+	OFLog(@"NOTICE: (%@): %@", user, notice);
 }
 
 -	   (void)connection: (IRCConnection*)connection
   didReceiveNamesForChannel: (OFString*)channel
 {
-	of_log(@"Users in %@: %@", channel,
+	OFLog(@"Users in %@: %@", channel,
 	    [connection usersInChannel: channel]);
 }
 
 - (void)connectionWasClosed: (IRCConnection*)connection
 {
-	of_log(@"Disconnected!");
+	OFLog(@"Disconnected!");
 
 	[OFApplication terminate];
 }

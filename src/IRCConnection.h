@@ -34,8 +34,7 @@ OF_ASSUME_NONNULL_BEGIN
    didCreateSocket: (OF_KINDOF(OFTCPSocket *))socket;
 - (void)connection: (IRCConnection *)connection
     didReceiveLine: (OFString *)line;
-- (void)connection: (IRCConnection *)connection
-       didSendLine: (OFString *)line;
+- (void)connection: (IRCConnection *)connection didSendLine: (OFString *)line;
 - (void)connectionWasEstablished: (IRCConnection *)connection;
 -	       (void)connection: (IRCConnection *)connection
   didFailToConnectWithException: (id)exception;
@@ -86,8 +85,8 @@ OF_ASSUME_NONNULL_BEGIN
 	OFString *_Nullable _realname;
 	OFMutableDictionary OF_GENERIC(OFString *, OFMutableSet *) *_channels;
 	id <IRCConnectionDelegate> _Nullable _delegate;
-	of_string_encoding_t _fallbackEncoding;
-	of_time_interval_t _pingInterval, _pingTimeout;
+	OFStringEncoding _fallbackEncoding;
+	OFTimeInterval _pingInterval, _pingTimeout;
 	OFString *_Nullable _pingData;
 	OFTimer *_Nullable _pingTimer;
 	bool _fallbackEncodingUsed;
@@ -102,8 +101,8 @@ OF_ASSUME_NONNULL_BEGIN
     id <IRCConnectionDelegate> delegate;
 @property OF_NULLABLE_PROPERTY (readonly, nonatomic)
     OF_KINDOF(OFTCPSocket *) socket;
-@property (nonatomic) of_string_encoding_t fallbackEncoding;
-@property (nonatomic) of_time_interval_t pingInterval, pingTimeout;
+@property (nonatomic) OFStringEncoding fallbackEncoding;
+@property (nonatomic) OFTimeInterval pingInterval, pingTimeout;
 
 + (instancetype)connection;
 - (void)sendLine: (OFString *)line;
@@ -113,12 +112,9 @@ OF_ASSUME_NONNULL_BEGIN
 - (void)disconnectWithReason: (nullable OFString *)reason;
 - (void)joinChannel: (OFString *)channelName;
 - (void)leaveChannel: (OFString *)channel;
-- (void)leaveChannel: (OFString *)channel
-	      reason: (nullable OFString *)reason;
-- (void)sendMessage: (OFString *)message
-		 to: (OFString *)to;
-- (void)sendNotice: (OFString *)notice
-		to: (OFString *)to;
+- (void)leaveChannel: (OFString *)channel reason: (nullable OFString *)reason;
+- (void)sendMessage: (OFString *)message to: (OFString *)to;
+- (void)sendNotice: (OFString *)notice to: (OFString *)to;
 - (void)kickUser: (OFString *)user
 	 channel: (OFString *)channel
 	  reason: (nullable OFString *)reason;

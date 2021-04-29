@@ -61,7 +61,7 @@
 		_socketClass = [OFTCPSocket class];
 		_channels = [[OFMutableDictionary alloc] init];
 		_port = 6667;
-		_fallbackEncoding = OF_STRING_ENCODING_ISO_8859_1;
+		_fallbackEncoding = OFStringEncodingISO8859_1;
 		_pingInterval = 120;
 		_pingTimeout = 30;
 	} @catch (id e) {
@@ -95,8 +95,7 @@
 
 	_socket = [[_socketClass alloc] init];
 	[_socket setDelegate: self];
-	[_socket asyncConnectToHost: _server
-			       port: _port];
+	[_socket asyncConnectToHost: _server port: _port];
 
 	objc_autoreleasePoolPop(pool);
 }
@@ -117,8 +116,7 @@
 
 	if ([_delegate respondsToSelector:
 	    @selector(connection:didCreateSocket:)])
-		[_delegate connection: self
-		      didCreateSocket: _socket];
+		[_delegate connection: self didCreateSocket: _socket];
 
 	[self sendLineWithFormat: @"NICK %@", _nickname];
 	[self sendLineWithFormat: @"USER %@ * 0 :%@", _username, _realname];
@@ -149,7 +147,7 @@
 {
 	void *pool = objc_autoreleasePoolPush();
 
-	channel = [[channel componentsSeparatedByString: @"\n"] firstObject];
+	channel = [channel componentsSeparatedByString: @"\n"].firstObject;
 
 	[self sendLineWithFormat: @"JOIN %@", channel];
 
@@ -158,17 +156,15 @@
 
 - (void)leaveChannel: (OFString *)channel
 {
-	[self leaveChannel: channel
-		    reason: nil];
+	[self leaveChannel: channel reason: nil];
 }
 
-- (void)leaveChannel: (OFString *)channel
-	      reason: (OFString *)reason
+- (void)leaveChannel: (OFString *)channel reason: (OFString *)reason
 {
 	void *pool = objc_autoreleasePoolPush();
 
-	channel = [[channel componentsSeparatedByString: @"\n"] firstObject];
-	reason = [[reason componentsSeparatedByString: @"\n"] firstObject];
+	channel = [channel componentsSeparatedByString: @"\n"].firstObject;
+	reason = [reason componentsSeparatedByString: @"\n"].firstObject;
 
 	if (reason == nil)
 		[self sendLineWithFormat: @"PART %@", channel];
@@ -183,8 +179,7 @@
 - (void)sendLine: (OFString *)line
 {
 	if ([_delegate respondsToSelector: @selector(connection:didSendLine:)])
-		[_delegate connection: self
-			  didSendLine: line];
+		[_delegate connection: self didSendLine: line];
 
 	[_socket writeLine: line];
 }
@@ -205,8 +200,7 @@
 	objc_autoreleasePoolPop(pool);
 }
 
-- (void)sendMessage: (OFString *)message
-		 to: (OFString *)to
+- (void)sendMessage: (OFString *)message to: (OFString *)to
 {
 	void *pool = objc_autoreleasePoolPush();
 
@@ -216,8 +210,7 @@
 	objc_autoreleasePoolPop(pool);
 }
 
-- (void)sendNotice: (OFString *)notice
-		to: (OFString *)to
+- (void)sendNotice: (OFString *)notice to: (OFString *)to
 {
 	void *pool = objc_autoreleasePoolPush();
 
@@ -244,8 +237,7 @@
 {
 	void *pool = objc_autoreleasePoolPush();
 
-	nickname = [[nickname componentsSeparatedByString: @"\n"]
-	    firstObject];
+	nickname = [nickname componentsSeparatedByString: @"\n"].firstObject;
 
 	[self sendLineWithFormat: @"NICK %@", nickname];
 
@@ -259,8 +251,7 @@
 
 	if ([_delegate respondsToSelector:
 	    @selector(connection:didReceiveLine:)])
-		[_delegate connection: self
-		       didReceiveLine: line];
+		[_delegate connection: self didReceiveLine: line];
 
 	components = [line componentsSeparatedByString: @" "];
 
@@ -268,7 +259,7 @@
 	if ([components count] == 2 &&
 	    [[components firstObject] isEqual: @"PING"]) {
 		OFMutableString *s = [[line mutableCopy] autorelease];
-		[s replaceCharactersInRange: of_range(0, 4)
+		[s replaceCharactersInRange: OFRangeMake(0, 4)
 				 withString: @"PONG"];
 		[self sendLine: s];
 
@@ -276,7 +267,7 @@
 	}
 
 	/* PONG */
-	if ([components count] == 4 &&
+	if (components.count == 4 &&
 	    [[components objectAtIndex: 1] isEqual: @"PONG"] &&
 	    [[components objectAtIndex: 3] isEqual: _pingData]) {
 		[_pingTimer invalidate];
@@ -291,7 +282,7 @@
 	action = [[components objectAtIndex: 1] uppercaseString];
 
 	/* Connected */
-	if ([action isEqual: @"001"] && [components count] >= 4) {
+	if ([action isEqual: @"001"] && components.count >= 4) {
 		if ([_delegate respondsToSelector:
 		    @selector(connectionWasEstablished:)])
 			[_delegate connectionWasEstablished: self];
@@ -305,24 +296,23 @@
 	}
 
 	/* JOIN */
-	if ([action isEqual: @"JOIN"] && [components count] == 3) {
+	if ([action isEqual: @"JOIN"] && components.count == 3) {
 		OFString *who = [components objectAtIndex: 0];
 		OFString *where = [components objectAtIndex: 2];
 		IRCUser *user;
 		OFMutableSet *channel;
 
-		who = [who substringWithRange: of_range(1, [who length] - 1)];
+		who = [who substringWithRange: OFRangeMake(1, who.length - 1)];
 		user = [IRCUser IRCUserWithString: who];
 
 		if ([who hasPrefix:
 		    [_nickname stringByAppendingString: @"!"]]) {
 			channel = [OFMutableSet set];
-			[_channels setObject: channel
-				      forKey: where];
+			[_channels setObject: channel forKey: where];
 		} else
 			channel = [_channels objectForKey: where];
 
-		[channel addObject: [user nickname]];
+		[channel addObject: user.nickname];
 
 		if ([_delegate respondsToSelector:
 		    @selector(connection:didSeeUser:joinChannel:)])
@@ -334,7 +324,7 @@
 	}
 
 	/* NAMES reply */
-	if ([action isEqual: @"353"] && [components count] >= 6) {
+	if ([action isEqual: @"353"] && components.count >= 6) {
 		OFString *where;
 		OFMutableSet *channel;
 		OFArray *users;
@@ -354,14 +344,14 @@
 		    [[components objectAtIndex: 4] length] + 6;
 
 		users = [[line substringWithRange:
-		    of_range(pos, [line length] - pos)]
+		    OFRangeMake(pos, line.length - pos)]
 		    componentsSeparatedByString: @" "];
 
 		for (OFString *user in users) {
 			if ([user hasPrefix: @"@"] || [user hasPrefix: @"+"] ||
 			    [user hasPrefix: @"%"] || [user hasPrefix: @"*"])
 				user = [user substringWithRange:
-				    of_range(1, [user length] - 1)];
+				    OFRangeMake(1, user.length - 1)];
 
 			[channel addObject: user];
 		}
@@ -381,18 +371,18 @@
 		IRCUser *user;
 		OFMutableSet *channel;
 		OFString *reason = nil;
-		size_t pos = [who length] + 1 +
-		    [[components objectAtIndex: 1] length] + 1 + [where length];
+		size_t pos = who.length + 1 +
+		    [[components objectAtIndex: 1] length] + 1 + where.length;
 
-		who = [who substringWithRange: of_range(1, [who length] - 1)];
+		who = [who substringWithRange: OFRangeMake(1, who.length - 1)];
 		user = [IRCUser IRCUserWithString: who];
 		channel = [_channels objectForKey: where];
 
-		if ([components count] > 3)
+		if (components.count > 3)
 			reason = [line substringWithRange:
-			    of_range(pos + 2, [line length] - pos - 2)];
+			    OFRangeMake(pos + 2, line.length - pos - 2)];
 
-		[channel removeObject: [user nickname]];
+		[channel removeObject: user.nickname];
 
 		if ([_delegate respondsToSelector:
 		    @selector(connection:didSeeUser:leaveChannel:reason:)])
@@ -405,26 +395,26 @@
 	}
 
 	/* KICK */
-	if ([action isEqual: @"KICK"] && [components count] >= 4) {
+	if ([action isEqual: @"KICK"] && components.count >= 4) {
 		OFString *who = [components objectAtIndex: 0];
 		OFString *where = [components objectAtIndex: 2];
 		OFString *whom = [components objectAtIndex: 3];
 		IRCUser *user;
 		OFMutableSet *channel;
 		OFString *reason = nil;
-		size_t pos = [who length] + 1 +
+		size_t pos = who.length + 1 +
 		    [[components objectAtIndex: 1] length] + 1 +
-		    [where length] + 1 + [whom length];
+		    where.length + 1 + whom.length;
 
-		who = [who substringWithRange: of_range(1, [who length] - 1)];
+		who = [who substringWithRange: OFRangeMake(1, who.length - 1)];
 		user = [IRCUser IRCUserWithString: who];
 		channel = [_channels objectForKey: where];
 
 		if ([components count] > 4)
 			reason = [line substringWithRange:
-			    of_range(pos + 2, [line length] - pos - 2)];
+			    OFRangeMake(pos + 2, line.length - pos - 2)];
 
-		[channel removeObject: [user nickname]];
+		[channel removeObject: user.nickname];
 
 		if ([_delegate respondsToSelector:
 		    @selector(connection:didSeeUser:kickUser:channel:reason:)])
@@ -438,23 +428,23 @@
 	}
 
 	/* QUIT */
-	if ([action isEqual: @"QUIT"] && [components count] >= 2) {
+	if ([action isEqual: @"QUIT"] && components.count >= 2) {
 		OFString *who = [components objectAtIndex: 0];
 		IRCUser *user;
 		OFString *reason = nil;
-		size_t pos = [who length] + 1 +
+		size_t pos = who.length + 1 +
 		    [[components objectAtIndex: 1] length];
 
-		who = [who substringWithRange: of_range(1, [who length] - 1)];
+		who = [who substringWithRange: OFRangeMake(1, who.length - 1)];
 		user = [IRCUser IRCUserWithString: who];
 
 		if ([components count] > 2)
 			reason = [line substringWithRange:
-			    of_range(pos + 2, [line length] - pos - 2)];
+			    OFRangeMake(pos + 2, line.length - pos - 2)];
 
 		for (OFString *channel in _channels)
 			[[_channels objectForKey: channel]
-			    removeObject: [user nickname]];
+			    removeObject: user.nickname];
 
 		if ([_delegate respondsToSelector:
 		    @selector(connection:didSeeUserQuit:reason:)])
@@ -466,25 +456,25 @@
 	}
 
 	/* NICK */
-	if ([action isEqual: @"NICK"] && [components count] == 3) {
+	if ([action isEqual: @"NICK"] && components.count == 3) {
 		OFString *who = [components objectAtIndex: 0];
 		OFString *nickname = [components objectAtIndex: 2];
 		IRCUser *user;
 
-		who = [who substringWithRange: of_range(1, [who length] - 1)];
+		who = [who substringWithRange: OFRangeMake(1, who.length - 1)];
 		nickname = [nickname substringWithRange:
-		    of_range(1, [nickname length] - 1)];
+		    OFRangeMake(1, nickname.length - 1)];
 
 		user = [IRCUser IRCUserWithString: who];
 
-		if ([[user nickname] isEqual: _nickname]) {
+		if ([user.nickname isEqual: _nickname]) {
 			[_nickname release];
 			_nickname = [nickname copy];
 		}
 
 		for (OFMutableSet *channel in _channels) {
-			if ([channel containsObject: [user nickname]]) {
-				[channel removeObject: [user nickname]];
+			if ([channel containsObject: user.nickname]) {
+				[channel removeObject: user.nickname];
 				[channel addObject: nickname];
 			}
 		}
@@ -499,18 +489,18 @@
 	}
 
 	/* PRIVMSG */
-	if ([action isEqual: @"PRIVMSG"] && [components count] >= 4) {
+	if ([action isEqual: @"PRIVMSG"] && components.count >= 4) {
 		OFString *from = [components objectAtIndex: 0];
 		OFString *to = [components objectAtIndex: 2];
 		IRCUser *user;
 		OFString *message;
-		size_t pos = [from length] + 1 +
-		    [[components objectAtIndex: 1] length] + 1 + [to length];
+		size_t pos = from.length + 1 +
+		    [[components objectAtIndex: 1] length] + 1 + to.length;
 
 		from = [from substringWithRange:
-		    of_range(1, [from length] - 1)];
+		    OFRangeMake(1, from.length - 1)];
 		message = [line substringWithRange:
-		    of_range(pos + 2, [line length] - pos - 2)];
+		    OFRangeMake(pos + 2, line.length - pos - 2)];
 		user = [IRCUser IRCUserWithString: from];
 
 		if (![to isEqual: _nickname]) {
@@ -532,18 +522,18 @@
 	}
 
 	/* NOTICE */
-	if ([action isEqual: @"NOTICE"] && [components count] >= 4) {
+	if ([action isEqual: @"NOTICE"] && components.count >= 4) {
 		OFString *from = [components objectAtIndex: 0];
 		OFString *to = [components objectAtIndex: 2];
 		IRCUser *user = nil;
 		OFString *notice;
-		size_t pos = [from length] + 1 +
-		    [[components objectAtIndex: 1] length] + 1 + [to length];
+		size_t pos = from.length + 1 +
+		    [[components objectAtIndex: 1] length] + 1 + to.length;
 
 		from = [from substringWithRange:
-		    of_range(1, [from length] - 1)];
+		    OFRangeMake(1, from.length - 1)];
 		notice = [line substringWithRange:
-		    of_range(pos + 2, [line length] - pos - 2)];
+		    OFRangeMake(pos + 2, line.length - pos - 2)];
 
 		if (![from containsString: @"!"] || [to isEqual: @"*"]) {
 			/* System message - ignore for now */
@@ -575,6 +565,8 @@
 {
 	[_pingData release];
 	[_pingTimer release];
+	_pingData = nil;
+	_pingTimer = nil;
 
 	_pingData = [[OFString alloc] initWithFormat: @":%d", rand()];
 	[_socket writeFormat: @"PING %@\r\n", _pingData];
@@ -623,8 +615,7 @@
 
 	[_pingTimer invalidate];
 
-	[_socket performSelector: @selector(cancelAsyncRequests)
-		      afterDelay: 0];
+	[_socket performSelector: @selector(cancelAsyncRequests) afterDelay: 0];
 	[_socket release];
 	_socket = nil;
 

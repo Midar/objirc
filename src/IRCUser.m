@@ -50,10 +50,7 @@
 	@try {
 		char *tmp;
 
-		if ((tmp2 = strdup([string UTF8String])) == NULL)
-			@throw [OFOutOfMemoryException
-			     exceptionWithRequestedSize:
-			     [string UTF8StringLength]];
+		tmp2 = OFStrDup(string.UTF8String);
 
 		if ((tmp = strchr(tmp2, '@')) == NULL)
 			@throw [OFInvalidFormatException exception];
